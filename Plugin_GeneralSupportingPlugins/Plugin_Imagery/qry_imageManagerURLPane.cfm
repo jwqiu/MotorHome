@@ -1,0 +1,24 @@
+<CFSILENT>
+	<CFPARAM NAME="ATTRIBUTES.Path">
+	<CFPARAM NAME="ATTRIBUTES.URL">
+	
+	<CFIF IsDefined("ATTRIBUTES.Do_#ATTRIBUTES.FuseAction#")>
+		
+		<!--- Take a file for uploading, upload it --->
+		<CFPARAM NAME="ATTRIBUTES.UploadFile" DEFAULT="">
+		<CFIF Len(ATTRIBUTES.UploadFile)>
+			<CFFILE ACTION="UPLOAD" FILEFIELD="UploadFile" DESTINATION="#ATTRIBUTES.Path#"
+				NAMECONFLICT="MakeUnique">
+		
+			<CFSET ATTRIBUTES.URL = ATTRIBUTES.URL & CFFILE.ServerFile>
+			<CFHTMLHEAD TEXT="<SCRIPT LANGUAGE='Javascript'>parent.showImage('#JsStringFormat(ATTRIBUTES.Path)#', '#JsStringFormat(ATTRIBUTES.URL)#');</SCRIPT>">
+		</CFIF>
+		
+		<CFPARAM NAME="ATTRIBUTES.NewDirectory" DEFAULT="">
+		<CFIF Len(ATTRIBUTES.NewDirectory)>
+			<CFDIRECTORY ACTION="CREATE" DIRECTORY="#ATTRIBUTES.Path##ATTRIBUTES.NewDirectory#">
+			<CFSET ATTRIBUTES.Path = ATTRIBUTES.Path & ATTRIBUTES.NewDirectory & "\">
+			<CFSET ATTRIBUTES.URL  = ATTRIBUTES.URL  & ATTRIBUTES.URL & "/">
+		</CFIF>
+	</CFIF>
+</CFSILENT>

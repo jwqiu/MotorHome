@@ -1,0 +1,1542 @@
+Country  Australia 
+
+Australian Capital Territory                  
+Canberra
+
+New South Wales                                  
+Newcastle             
+                                                               Sydney
+                                                               Wagga Wagga
+                                                               Newcastle
+
+Northern Territory                                 
+Alice Spring
+                                                               Darwin
+ 
+Queensland                                            
+Brisbane           
+                                                               Cairns                                                                      
+                                                               Mackay 
+                                                               Rockhampton
+                                                               Townsville
+
+South Australia                                      
+Adelaide
+                                                               Port Augusta
+
+Tasmania                                                
+Hobart
+
+Victoria                                                  
+Ballarat
+                                                               Geelong
+                                                               Melbourne
+
+Western Australia                                  
+Albany
+                                                               Carnarvon
+                                                               Derby
+                                                               Katgoorrlie-Boulder                    
+                                             
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country  Austria       
+
+
+
+Burgenland                                               
+Eisen     
+
+Kamten                                                     
+Klagenfurt
+                                                                  Villach
+
+Niederostrerreich                                      
+Baden
+                                                                  Gmund                                                                                           
+                                                                  Krems
+
+Oberosterreich                                          
+Linz
+                                                                  Steyr
+                                                                  Wels
+
+    
+Salzburg                                                   
+Bischofshofen
+                                                                 Salzburg
+
+
+Stienmark                                                 
+Bruck                                                                
+                                                                  Eisenerz
+                                                                  Graz
+
+Tirol                                                           
+Innsbruck
+                                                                   Kufstien
+                                                                   Landeck
+
+Voralberg                                                   
+Bregenz
+                                                                   Feldkirch
+
+
+Wien                                                          
+Wien  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country     Canada
+
+
+Central Canada                                 
+Ottawa
+                                                              Thunder Bay
+                                                              Toronto
+                                                              Winnipeg
+
+Eastern Canada                                 
+Halifax
+                                                              Labrador
+                                                              Montreal
+                                                              Quebec
+
+Western Canada                               
+Calgary
+                                                              Edmonton
+                                                              Fort Nelson
+                                                              Prince George
+                                                              Regina
+                                                              Vancouver
+                                                              Whitehorse
+                                                              Yellowknife 
+                                                                 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country         Denmark 
+                         
+
+Fyn                                                                
+Nyborg
+                                                                      Odense  
+                                                                      Swindborg
+
+Jylland                                                          
+Abenra
+                                                                      Alborg
+                                                                      Arhus
+                                                                      Esbjerg
+                                                                      Farso
+                                                                      Holstebro	
+                                                                      Ribe
+                                                                      Silkenborg
+                                                                      Tilsted
+                                                                      Vejle
+                                                                      Viborg
+
+Sjaelland  Bornholm                                     
+Copenhagen
+                                                                      Kalundborg
+                                                                      Nakskov
+                                                                      Rinsted
+                                                                      Slagelse
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country       England
+
+
+East Anglia
+Cambridge
+Norwich
+
+Northeast England
+Durham
+Leeds
+Newcastle-upon-Tyne
+Sheffield
+York
+
+Northwest England
+Carlisle
+Liverpool
+Manchester
+
+London
+London
+
+South England
+Portsmouth
+Dover
+
+Southwest England
+Bath
+Bristol
+Penzance
+Plymouth
+Salisbury
+
+The Heart of England
+Oxford
+Stratford-Upon-Avon
+
+The Midlands
+Birmingham
+Lincoln
+Shrewsbury
+
+
+
+
+
+Country                France
+
+Aquitaine
+Bordeaux
+Boyonne
+La Rochelle
+
+Bretagne
+Quimper
+St Nazaire
+Rennes
+
+Centre
+Clermont
+Ferrand
+Limoges
+Orleans
+Tours
+
+Channel Islands
+
+Corse
+
+Ile de France
+Paris
+
+Languedoc
+Montpellier
+Perpignan
+
+Lorraine
+Dijon
+Metz
+Montbeliard
+Metz
+Nancy
+
+Midi
+Toulouse
+
+
+
+
+
+
+Normandie
+Le Havre
+Roven
+
+
+Nord
+Amiens
+Boulogne
+Lille
+Reims
+
+
+Provence
+Marseilles
+Monte Carlo
+Nimes
+Toulon
+
+Rhone Alpes
+Lyon
+St Etienne
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country     Germany
+
+Baden-Wurttemberg
+Frieburg
+Karlsruhe
+Konstanz
+Stuttgart
+
+Bavaria
+Arisbach
+Bamberg
+Munchen
+Nurnberg
+Rossenheim
+Wurtzburg
+
+Berlin
+Berlin
+
+Brandenburg
+Oraniemburg
+Potsdam
+
+Bremen
+Bremen
+
+Erfurt
+
+Hamburg
+Hamburg
+
+Lower Saxony
+Celle
+Hannover
+
+Mecklenburg-Vorpormmern
+Schwerin
+Stralsund
+
+
+
+
+
+
+
+North Rhine-Westphalia
+Bonn
+Dusseldorf
+Munster
+Siegen
+ 
+
+Rhineland-Paltinate
+Koblenz
+Trier
+
+Saarland
+Saarbrucken
+
+Sachsen-Anhalt
+Halle
+Magdeburg
+
+Saxony
+Dresden
+Leipzip
+
+Schleswig-Holstein
+Kiel
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country    Ireland
+
+
+East Ireland
+Dublin
+Drogheda
+Waterford
+Wexford
+
+
+Northern Ireland
+Armagh
+Belfast
+Coleraine
+Cookstown
+Enniskillen
+
+Northwest Ireland
+Donegal
+Londonderry
+Sligo
+
+South Ireland
+Cork
+Kilarney
+Tipperary
+Tralee
+
+West Ireland
+Athlone
+Castlebar
+Galway
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country    Italy
+
+Abruzzo
+Pescara
+
+Basilicata
+Polenza
+
+Calabria
+Cantanzaro
+Reggio
+
+Campania
+Napoli
+
+Emilia
+Bologna
+
+Friuli
+Trieste
+
+Lazio
+Roma
+
+Liquiria
+Genova
+
+Lombardia
+Milano
+
+Marche
+Ancona
+
+Molise
+Termoli
+
+Pjemonte
+Trino
+
+Puqlia
+Bari
+
+
+
+
+
+Sardeqna
+Cagliari
+Sassari
+
+
+
+
+Sicilia
+Agrigento
+Catania
+Palermo
+Syracuse
+
+Trentino
+Trento
+
+Toscana
+Firenze
+Siena
+
+Umbria
+Perugia
+
+Val D'Aosta
+Aosta
+
+Veneto
+Venezia
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country   Netherlands
+
+Drenthe
+Assen
+Emmen
+Hoogeyeen
+
+Friesland
+Drachlen
+Joyce
+Sneek
+
+Gelderland
+Apledoorn
+Arnhem
+
+Groningen
+Groningen
+
+Limburg
+Maastricht
+Roermond
+Venlo
+
+Noord-Brabant
+Breda
+Eindhoven
+Tilburg
+
+Noord-Holland
+Alkmaar
+Amsterdam
+Haarlem
+
+Overijssel
+Enschede
+Zwolie
+
+Utrecht
+Amersfoort
+
+
+
+
+
+
+
+
+Zeeland
+Middleburg
+Zuid-Holland
+Den Haag
+Rotterdam
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country     New Zealand
+
+
+Auckland
+Auckland
+
+Bay of Plenty
+Rotorua
+Tauranga
+
+Canterbury
+Ashburton
+Christchurch
+Timaru
+
+Central Plateau
+Taupo
+
+Coromandel
+Coromandel
+
+East Coast
+Gisborne
+
+Fiordland
+Te Anau
+
+Hawkes Bay
+Hastings
+Havelock North
+Napier
+
+Manawatu
+Feilding
+Palmerston North
+
+Marlborough
+Blenheim
+Kaikoura
+Picton
+
+
+
+
+
+
+
+Nelson 
+Nelson
+
+Northland
+Bay of Islands
+Whangaroa Bay
+Whangarei
+
+Otago
+Alexandra
+Dunedin
+Oamaru
+Queenstown
+Wanaka
+
+Southland
+Gore
+Invercargill
+
+Taranaki
+New Plymouth
+Wanganui
+
+Waikato
+Cambridge
+Hamilton
+
+Wairarapa
+Wairarapa
+
+Wellington
+Wellington
+
+Westcoast
+Greymouth
+Westport
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Country  Norway
+
+
+
+
+East Norway
+Drammen
+Oslo
+
+North Norway
+Bodo
+Narvik
+Tromso
+Trondhejm
+
+West Norway
+Bergen
+Stavanger
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country Portugal
+
+Alentejo
+Beja
+Evora
+Moura
+Portalegre
+Serpa
+
+Algarve
+Albufeira
+Lagos
+Faro
+Silves
+
+Beiras
+Castelo Branco
+Guarda
+Monsanto
+
+Douro
+Lamego
+Porto
+
+Estremadura
+Peniche
+Santarem
+
+Lisbon
+Lisbon
+
+Minho
+Braga
+Viana do Castelo
+
+Tras-os-montes
+Braganca
+Vila Real
+
+
+
+
+
+
+
+
+
+
+
+
+Country    Scotland
+
+Central Scotland
+Dundee
+Glasgow
+
+Highlands and Islands
+Aberdeen
+Fort William
+Inverness
+
+Southern Scotland
+Edinburgh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country South Africa
+
+Eastern Cape
+Cradock
+East London
+Grahamstown
+Port Elizabeth
+
+Free State
+Bloernfontein
+Welkom
+
+Gauleng
+Pretoria
+
+Kwazulu
+Durban
+Howick
+
+Mpumalanga
+Mpumalanga
+
+Northern Cape
+Kimberly
+Springbok
+Upington
+
+Northern Province
+Pietersburg
+
+North West Province
+Johannesburg
+
+Western Cape
+Cape Town
+Clanwilliam
+Knysna
+Hermanus
+Tulbagh
+
+
+
+
+
+
+
+
+Country Spain
+
+Andalvcia
+Cadiz
+Cordoba
+Gibraltar
+Grenada
+Malaga
+Sevilla
+
+Arqon
+Zarragoza
+
+Asturias
+Uriedo
+
+Cantabria
+Santander
+
+Castillia La Mancha
+Crudad Real
+Toledo
+
+Castilla Leon
+Burgos
+Valladoid
+Zamora
+
+Cataluna
+Gerona
+
+Communidal Valenciana
+Valenciana
+
+Extremadura
+Badajoz
+Caceres
+
+Galicia
+Coruna Vigo
+
+Islas Baleares
+Balearic Islands
+
+
+
+Islas Canarias
+Canary Islands
+
+La Rioja
+Logrono
+
+Madrid
+Madrid
+
+Murcia
+Cartegana
+
+Navarra
+Maya
+
+Pais Vagco
+Bjlboa
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country Sweden
+
+Gotaland
+Gothenburg
+Halmstad
+Jonkoping
+
+Norrland
+Pitea
+Sundsvall
+Umea
+
+Svealand
+Gavle
+Stockholm
+Uppsala
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country Switzerland
+
+
+Centre-Est
+St Gallen
+Winterthur
+Zoug Luzern
+Zurich
+
+Graubunden
+Davos
+Flims
+Klosters
+St Moritz
+
+Ouest
+Basel
+Bern
+Fribourg
+Interlaken
+Lausanne
+Neuchatel
+Solothurn
+
+Valaise
+Bellinzona
+Brig
+Martigny
+Sierre
+Sion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Country United States
+
+Alabama
+Mobile
+Montgomery
+
+Alaska
+Anchorage
+Fairbanks
+Juneau
+
+Arizona
+Grand Canyon
+Phoenix
+Tucson
+
+Arkansas
+Little Rock
+
+California
+Eureka
+Fresno
+Los Angeles
+Sacramento
+San Diego
+
+Colorado
+Denver
+Pueblo
+
+Connecticut
+Hartford
+
+Delaware
+Dover
+
+Florida
+Jacksonville
+Key West
+Miami
+Orlando
+Panama City
+Tallahassee
+
+
+
+
+
+Georgia
+Atlanta
+
+Hawaii
+Honolulu
+
+Idaho
+Boise
+Pocatello
+
+Illinois
+Chicago
+Springfield
+
+Indiana
+Indianapolis
+
+Iowa
+Sioux City
+
+Kansas
+Dodge City
+Kansas City
+Topeca
+
+ 
+Kentucky
+Frankfort
+Louisville
+
+Louisiana
+Baton
+New Orleans
+Rouge
+
+Maine
+Bangor
+Augusta
+
+Maryland
+Annapolis
+Baltimore
+Washington D.C.
+
+
+
+
+
+
+Massachusetts
+Boston
+
+Michigan
+Chicago
+Detroit
+Lansing
+
+Minnesota
+Minneapolis
+Roseau
+St Paul
+Mississippi
+Jackson
+
+Missouri
+Jefferson City
+Sprinfield
+St Louis
+
+Montana
+Billings
+Glasglow
+
+Nebraska
+Lincoln
+Omaha
+
+Nevada
+Carson City
+Elko
+Las Vegas
+
+New Hampshire
+Concord
+
+New Jersey
+Philadelphia
+Trenton
+
+
+
+
+
+
+
+New Mexico
+Albuquerue
+El Paso
+Santa Fe
+
+ 
+New York
+Abany
+Buffalo
+New York
+Rochester
+Syracuse
+
+North Carolina
+Raleigh
+
+North Dakota
+Bismarch
+Dawson
+Fargo
+Williston
+
+Ohio
+Columbus
+
+Oklahoma
+Oklahoma City
+Tulsa
+
+Oregon
+Eugene
+Portland
+Eugene
+Salem
+
+Pennsylvania
+Erie
+Harrisburg
+Pittsburg
+Scranton
+
+Rhode Island
+Providence
+
+
+
+
+
+South Carolina
+Columbia
+
+South Dakota
+Gettysburg
+Mitchell
+Pierre
+Rapid City
+
+
+
+Tennessee
+Memphis
+Nashville
+
+Texas
+Dallas
+Houston
+
+Utah
+Cedar City
+Salt Lake City
+
+Vermont
+Montpelier
+
+Virginia
+Norfolk
+Richmond
+
+Washington
+Olympia
+Seattle
+Spokane
+Tacoma
+
+West Virginia
+Charleston
+
+Wisconsin
+Madison
+Malwaukee
+
+
+
+
+
+
+Wyoming
+Cheyenne
+Rock Springs
+Sheridan
+
+
+
+
+
+
+
+
+
+
+
+Country Wales
+
+Clwyd
+Wrexham
+
+Dyfed
+Aberystwyth
+Harverfordwest
+
+Glamorgan
+Cardiff
+Swansen
+
+Gwent
+Newport
+
+Gwynedd
+Bangor
+Caernarvon
+Holyhead
+
+Powys
+Hay on Wye
+Newtown
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

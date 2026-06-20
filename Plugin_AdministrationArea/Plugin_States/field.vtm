@@ -1,0 +1,119 @@
+
+ <Tag Name="Field" BodyEditing="No">
+  <EditorLayout Height="300" Width="523" LFHeight="360" LFWidth="628">
+   <Container Name="MainTabDialog" Type="TabDialog" Width="522" Height="304" LFWidth="626" LFHeight="359">
+    <Container Type="TabPage" Name="MainTabDialogPage_1" Caption="Field Tag">
+     <Control Name="lblLbl11" Type="Label" Down="10" Right="5" Caption="Field Name :" Align="Left"/>
+     <Control Name="fieldName" Type="TextBox" Required="Yes" RequiredInView="Yes" Width="187" LFWidth="224" Down="10" Right="95"/>
+     <Control Name="lblLbl6" Type="Label" Down="10" Right="305" Caption="Type :" FocusControl="ddnType" Align="Left"/>
+     <Control Name="Type" Type="DropDown" Required="Yes" RequiredInView="Yes" Width="157" LFWidth="188" Down="10" Right="350" Editable="Yes">
+      <Item Value="text" Caption="text"/>
+      <Item Value="password" Caption="password"/>
+      <Item Value="date" Caption="date"/>
+      <Item Value="checkbox" Caption="checkbox"/>
+      <Item Value="boolean" Caption="boolean"/>
+      <Item Value="integer" Caption="integer"/>
+      <Item Value="money" Caption="money"/>
+      <Item Value="float" Caption="float"/>
+      <Item Value="percent" Caption="percent"/>
+      <Item Value="lookup" Caption="lookup"/>
+      <Item Value="memo" Caption="memo"/>
+     </Control>
+     <Control Name="lblLbl1" Type="Label" Down="40" Right="5" Caption="Display Name :" FocusControl="txtDisplayname" Align="Left"/>
+     <Control Name="Displayname" Type="TextBox" Width="412" LFWidth="494" Down="40" Right="95"/>
+     <Control Name="lblLbl3" Type="Label" Down="70" Right="5" Caption="Note :" FocusControl="txtNote" Align="Left"/>
+     <Control Name="Note" Type="TextBox" Width="411" LFWidth="493" Down="70" Right="95"/>
+     <Control Name="lblLbl9" Type="Label" Down="100" Right="5" Caption="Message :" FocusControl="txtNote" Align="Left"/>
+     <Control Name="Message" Type="TextBox" Width="411" LFWidth="493" Down="100" Right="95"/>
+     <Container Name="panPan2" Type="Panel" Width="137" Height="127" LFWidth="164" LFHeight="150" Down="135" Right="5" Caption="Size">
+      <Control Name="Size" Type="TextBox" Width="31" LFWidth="37" Down="20" Right="90" Value="30"/>
+      <Control Name="lblLbl7" Type="Label" Down="25" Right="10" Caption="Size :" FocusControl="ddnType" Align="Left"/>
+      <Control Name="Maxlength" Type="TextBox" Width="30" LFWidth="36" Down="45" Right="90" Value="255"/>
+      <Control Name="lblLbl4" Type="Label" Down="50" Right="10" Caption="Max Length :" FocusControl="ddnType" Align="Left"/>
+      <Control Name="Rows" Type="TextBox" Width="30" LFWidth="36" Down="70" Right="90" Value="10"/>
+      <Control Name="lblLbl2" Type="Label" Down="75" Right="10" Caption="Rows :" FocusControl="ddnType" Align="Left"/>
+      <Control Name="Cols" Type="TextBox" Width="30" LFWidth="36" Down="95" Right="90" Value="75"/>
+      <Control Name="lblLbl5" Type="Label" Down="100" Right="10" Caption="Cols :" FocusControl="ddnType" Align="Left"/>
+     </Container>
+     <Container Name="panPan1" Type="Panel" Width="98" Height="128" LFWidth="118" LFHeight="151" Down="135" Right="155" Caption="Validation">
+      <Control Name="Required" Type="Checkbox" Width="74" Height="21" LFWidth="89" LFHeight="25" Down="20" Right="10" Caption="Required" Checked="No" vvtm_ValueWhenChecked="Yes" vvtm_ValueWhenUnchecked="No"/>
+      <Control Name="Verify" Type="Checkbox" Width="60" Height="21" LFWidth="72" LFHeight="25" Down="45" Right="10" Caption="Verify" Checked="No" vvtm_ValueWhenChecked="Yes" vvtm_ValueWhenUnchecked="No"/>
+      <Control Name="Unique" Type="Checkbox" Width="62" Height="21" LFWidth="74" LFHeight="25" Down="70" Right="10" Caption="Unique" Checked="No" vvtm_ValueWhenChecked="Yes" vvtm_ValueWhenUnchecked="No"/>
+      <Control Name="Allowhtml" Type="Checkbox" Width="82" Height="21" LFWidth="98" LFHeight="25" Down="95" Right="10" Caption="Allow HTML" Checked="No" vvtm_ValueWhenChecked="Yes" vvtm_ValueWhenUnchecked="No"/>
+     </Container>
+     <Container Name="panPan3" Type="Panel" Width="240" Height="128" LFWidth="288" LFHeight="151" Down="135" Right="265" Caption="Lookup Table">
+      <Control Name="Linkqueryfuseaction" Type="TextBox" Height="22" LFHeight="26" Down="15" Right="110"/>
+      <Control Name="lblLbl8" Type="Label" Down="20" Right="10" Caption="Query Fuseaction :" FocusControl="txtLinkqueryfuseaction" Align="Left"/>
+      <Control Name="Linkqueryvalue" Type="TextBox" Down="45" Right="110"/>
+      <Control Name="lblLbl13" Type="Label" Down="50" Right="10" Caption="Value Field :" FocusControl="txtLinkqueryfuseaction" Align="Left"/>
+      <Control Name="Linkquerydisplay" Type="TextBox" Width="120" LFWidth="144" Down="75" Right="110"/>
+      <Control Name="lblLbl12" Type="Label" Down="80" Right="10" Caption="Display Field :" FocusControl="txtLinkqueryfuseaction" Align="Left"/>
+     </Container>
+    </Container>
+   </Container>
+  </EditorLayout>
+  <Attributes>
+   <Attrib Name="xx" Control="&quot;&quot;" Type="TEXT"/>
+   <Attrib Name="fieldName" Control="fieldName" Type="TEXT"/>
+   <Attrib Name="type" Control="type" Type="Enumerated">
+    <AttribOption Value="text" Caption="text"/>
+    <AttribOption Value="password" Caption="password"/>
+    <AttribOption Value="date" Caption="date"/>
+    <AttribOption Value="checkbox" Caption="checkbox"/>
+    <AttribOption Value="boolean" Caption="boolean"/>
+    <AttribOption Value="integer" Caption="integer"/>
+    <AttribOption Value="money" Caption="money"/>
+    <AttribOption Value="float" Caption="float"/>
+    <AttribOption Value="percent" Caption="percent"/>
+    <AttribOption Value="lookup" Caption="lookup"/>
+    <AttribOption Value="memo" Caption="memo"/>
+   </Attrib>
+   <Attrib Name="required" Control="required" Type="Enumerated">
+    <AttribOption Value="Yes" Caption="Yes"/>
+    <AttribOption Value="No" Caption="No"/>
+   </Attrib>
+   <Attrib Name="unique" Control="unique" Type="Enumerated">
+    <AttribOption Value="Yes" Caption="Yes"/>
+    <AttribOption Value="No" Caption="No"/>
+   </Attrib>
+   <Attrib Name="verify" Control="verify" Type="Enumerated">
+    <AttribOption Value="Yes" Caption="Yes"/>
+    <AttribOption Value="No" Caption="No"/>
+   </Attrib>
+   <Attrib Name="size" Control="size" Type="TEXT"/>
+   <Attrib Name="maxLength" Control="maxLength" Type="TEXT"/>
+   <Attrib Name="rows" Control="rows" Type="TEXT"/>
+   <Attrib Name="cols" Control="cols" Type="TEXT"/>
+   <Attrib Name="displayname" Control="displayName" Type="TEXT"/>
+   <Attrib Name="note" Control="note" Type="TEXT"/>
+   <Attrib Name="message" Control="message" Type="TEXT"/>
+   <Attrib Name="AllowHTML" Control="allowHTML" Type="Enumerated">
+    <AttribOption Value="Yes" Caption="Yes"/>
+    <AttribOption Value="No" Caption="No"/>
+   </Attrib>
+   <Attrib Name="linkQueryFuseaction" Control="linkqueryfuseaction" Type="TEXT"/>
+   <Attrib Name="linkQueryValue" Control="Linkqueryvalue" Type="TEXT"/>
+   <Attrib Name="linkQueryDisplay" Control="Linkquerydisplay" Type="TEXT"/>
+  </Attributes>
+  <AttribCategories/>
+  <TagLayout>
+  
+  	<CF_FIELD 	
+			FieldName  ="$${fieldName}""
+			DisplayName="$${displayName}"
+			Note       ="$${note}"
+			Message    ="$${message}"
+			Type       ="$${type}"
+			Required   ="$${required}"
+			AllowHTML  ="$${allowHTML}"
+			Verify     ="$${verify}"
+			Unique     ="$${unique}"
+			Size       ="$${size}"  MaxLength  ="$${maxLength}"
+			Rows       ="$${rows}"  Cols       ="$${cols}"	
+			LinkQueryFuseaction ="$${linkQueryFuseaction}"
+			LinkQueryValue      ="$${linkQueryValue}"
+			LinkQueryDisplay    ="$${linkQueryDisplay}"
+	/>
+</TagLayout>
+  <TagDescription/>
+ </Tag>

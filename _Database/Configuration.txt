@@ -1,0 +1,5 @@
+INSERT INTO Configuration
+	(CoID, CoWebsiteName, CoEmailAddress, CoBCCAddress, CoKeywords, CoDescription,
+		 CoAdminUsername, CoAdminPassword, CoContactDetails)
+VALUES
+	(1, 'Motorhome Exchange', NULL, NULL, NULL, NULL, 'User', 'Pass', NULL)

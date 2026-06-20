@@ -1,0 +1,38 @@
+ллллллллллллллллллллллллллллллллл
+К                               К
+К  version: soEditor 2.1 Lite   К
+К  build: 2.12.20020121         К
+К  released: Jan.21.2002        К
+К  Љ 2002 SiteObjects, Inc.     К
+К                               К
+К  http://www.siteobjects.com/  К
+К                               К
+ллллллллллллллллллллллллллллллллл
+
+
+BUILD HISTORY
+=-=-=-=-=-=-=
+Є Jan.21.2002
+  Build 2.12.20020121 released
+  + Added unlink functionality.
+  + Added option to turn table borders on by default.
+  + Fixed several html insertion issues.
+
+Є Jan.12.2002
+  Version 2.1 released
+  + Added superscript and subscript buttons.
+  + Added help dialog.
+  + Fixed editing hyperlink issues.
+  + Added baseFontColor attribute to set initial text color.
+  + Added baseBGColor to set soEditor's default background color.
+  + Turned Spellchecker.net support off by default.
+  
+Є Dec.12.2001
+  Version 2.0 released.
+
+=-=-=-=-=-=-=
+
+
+SUPPORT
+=-=-=-=-=-=-=-=
+Є http://forums.siteobjects.com/index.cfm

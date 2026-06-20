@@ -1,0 +1,56 @@
+<CFPARAM NAME="ATTRIBUTES.File">
+
+<CFX_IMAGE ACTION="IML" FILE="#ATTRIBUTES.File#" COMMANDS="getsize">
+<CFSET CALLER.WIDth = ORIGINAL_WIDTH>
+<CFSET CALLER.Height = ORIGINAL_Height>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

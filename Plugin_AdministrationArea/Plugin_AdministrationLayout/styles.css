@@ -1,0 +1,66 @@
+BODY, TABLE, TD  { 
+		font-family : Verdana, Arial, Helvetica, sans-serif;
+		font-size : 10pt} 
+
+TD.entryErrors {
+	background-color : #F0FFFF;
+	border : thin;
+}
+
+TH {
+		font-family : Verdana, Arial, Helvetica, sans-serif;
+		font-size : 10pt;
+		font-weight : bolder;
+}
+
+H1 {
+	font-weight : bold;
+	font-size: 16pt;
+}
+
+H2 {
+	font-size : 14pt;
+	font-weight : bold;
+}
+
+H3 {
+	font-size : 12pt;
+	font-weight : bold;
+}
+
+.AdminSiteName { font-family: Arial, Helvetica, sans-serif; font-size: 16pt; font-style: normal; line-height: normal; color: #999999;}
+
+INPUT.adminButtons {
+	font-size: 8pt; font-variant: small-caps; background-color: Silver; padding-left:15px; padding-right:15px; border: thin outset white; cursor: hand; font-family: Arial, Helvetica, sans-serif;
+}
+
+.introText {  font-family: Arial, Helvetica, sans-serif; font-size: 9pt; font-style: normal; line-height: normal; color: #999999;}
+
+a.OLmenuLink {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	font-variant: small-caps;
+	color: #000066;
+	text-decoration: none
+}
+
+.evenListRow, .evenRow {
+	background-color : white;
+}
+
+.oddListRow, .oddRow {
+	background-color : #DCDCDC;
+}
+
+.menuBarItem {
+	border-right: 1px solid White;
+	border-top:thin solid White;
+	border-left:none;
+	border-bottom:none;
+	font-variant: small-caps;
+	text-align: center;
+	width: 150px;
+	color:white;
+	cursor : pointer;
+}
+

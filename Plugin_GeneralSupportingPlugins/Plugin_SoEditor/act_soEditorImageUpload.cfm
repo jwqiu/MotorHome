@@ -1,0 +1,6 @@
+<CFSILENT>
+<CFIF IsDefined("ATTRIBUTES.Do_#ATTRIBUTES.FuseActioN#")>
+	<CFFILE ACTION="UPLOAD" FILEFIELD="ImageToUpload" DESTINATION="#ATTRIBUTES.ImagesDirectory#" NAMECONFLICT="MAKEUNIQUE">
+	<CFLOCATION URL="#CGI.SCRIPT_NAME#?FuseAction=soEditorImage&PreSelect=#URLEncodedFormat(File.ServerFile)#">
+</CFIF>
+</CFSILENT>

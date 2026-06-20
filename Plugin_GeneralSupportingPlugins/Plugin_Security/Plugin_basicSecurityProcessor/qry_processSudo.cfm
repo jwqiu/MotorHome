@@ -1,0 +1,13 @@
+<CFSILENT>
+	<CFPARAM NAME="REQUEST.#CFG.SMPrefix#_SUDO" DEFAULT="0">
+	<CFPARAM NAME="ATTRIBUTES.Action" DEFAULT="start">
+	
+	<CFIF ATTRIBUTES.Action eq "start">
+		<CFSET REQUEST["#CFG.SMPrefix#_SUDO"] = REQUEST["#CFG.SMPrefix#_SUDO"] + 1>
+	<CFELSE>
+		<CFSET REQUEST["#CFG.SMPrefix#_SUDO"] = REQUEST["#CFG.SMPrefix#_SUDO"] - 1>
+	</CFIF>
+	
+	<CFSET ATTRIBUTES.Authenticated = "Yes">
+	
+</CFSILENT>

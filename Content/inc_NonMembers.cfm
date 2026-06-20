@@ -1,0 +1,4 @@
+<LINK href="../styles.css" type=text/css rel=stylesheet><FONT size=2>
+<P><STRONG><FONT color=#0066cc size=3>How non-members can contact our members for free,<BR>At MotorhomeExchange-Sell.com</FONT></STRONG></P>
+<P align=justify><STRONG><EM><FONT color=#ff6600>MotorhomeExchange-Sell.com</FONT></EM></STRONG> allows non-members to view all listings, except new listings. A new listing is a listing which has become available within the last 48 hours. This service is for members only. Non-members can contact members directly from the members exchange/ rent/ sell/ wanted to buy/ wanted to rent listings. This option is available at the end of each listing. Simply scroll down to find the reply area. Advanced technology hides our members e-mail addresses and names. However, the message you send will be sent directly to the owner of the listing.<BR><BR></P>
+<P align=center><IMG src="http://www.MotorhomeExchange-Sell.com/Images/huskImages/pic7.jpg"></P></FONT>

@@ -1,0 +1,7 @@
+<CFSILENT>
+
+	<CFPARAM NAME="ATTRIBUTES.RootPath"     DEFAULT="#CFG.ImagesDirectory#">
+	<CFPARAM NAME="ATTRIBUTES.RootURL"      DEFAULT="#CFG.ImagesURL#">
+	<CFPARAM NAME="ATTRIBUTES.SaveFunction" DEFAULT="void">
+	
+</CFSILENT>
