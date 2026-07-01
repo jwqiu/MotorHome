@@ -1,0 +1,6 @@
+@MotorHome.Api_HostAddress = http://localhost:0
+
+GET {{MotorHome.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

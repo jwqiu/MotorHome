@@ -1,1 +1,19 @@
 /UI Mockup/
+
+# macOS
+.DS_Store
+
+# Frontend
+Frontend/node_modules/
+Frontend/dist/
+Frontend/.env.local
+Frontend/.env.*.local
+
+# .NET
+Backend/**/bin/
+Backend/**/obj/
+
+# IDE
+.vs/
+.vscode/*
+!.vscode/settings.json

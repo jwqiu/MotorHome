@@ -1,0 +1,10 @@
+{
+  "name": "motorhome",
+  "private": true,
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:backend": "dotnet run --project Backend/MotorHome.Api.csproj --urls http://127.0.0.1:5080",
+    "dev:frontend": "npm --prefix Frontend run dev -- --host 127.0.0.1 --port 5173",
+    "build": "npm --prefix Frontend run build && dotnet build Backend/MotorHome.sln"
+  }
+}
