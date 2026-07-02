@@ -28,7 +28,7 @@ function HeroSearchSection() {
         >
           <label className="flex flex-1 h-[38px] min-w-0 items-center  ">
             <input
-              className="w-full min-w-0 text-center border-0 bg-transparent text-md text-gray-600 outline-0 placeholder:text-gray-300"
+              className="w-full min-w-0 pl-20 text-center border-0 bg-transparent text-md text-gray-600 outline-0 placeholder:text-gray-300"
               type="text"
               placeholder="Where are you going?"
             />

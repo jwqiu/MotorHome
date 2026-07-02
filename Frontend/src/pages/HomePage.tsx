@@ -1,4 +1,8 @@
+import HomeCtaSection from '../components/home/HomeCtaSection'
+import BrowseListingsSection from '../components/home/BrowseListingsSection'
 import HeroSearchSection from '../components/home/HeroSearchSection'
+import HowItWorksSection from '../components/home/HowItWorksSection'
+import MemberStoriesSection from '../components/home/MemberStoriesSection'
 import Navbar from '../components/layout/Navbar'
 
 function HomePage() {
@@ -8,6 +12,10 @@ function HomePage() {
         <Navbar />
         <HeroSearchSection />
       </div>
+      <BrowseListingsSection />
+      <HowItWorksSection />
+      <MemberStoriesSection />
+      <HomeCtaSection />
     </main>
   )
 }
