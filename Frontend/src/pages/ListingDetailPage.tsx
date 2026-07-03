@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import DetailGallery from '../components/detail/DetailGallery'
 import EnquiryModal from '../components/detail/EnquiryModal'
 import ListingDetailSections from '../components/detail/ListingDetailSections'
 import OwnerContactCard from '../components/detail/OwnerContactCard'
+import SignInRequiredModal from '../components/detail/SignInRequiredModal'
 import { sharedListingDetail } from '../components/detail/listingDetailData'
+import { isAuthenticated } from '../components/auth/authSession'
 import { listings } from '../components/listing/listingData'
 import Navbar from '../components/layout/Navbar'
 
@@ -13,8 +15,11 @@ function getListingIdFromPath() {
 
 function ListingDetailPage() {
   const [isEnquiryOpen, setIsEnquiryOpen] = useState(false)
+  const [isSignInRequiredOpen, setIsSignInRequiredOpen] = useState(false)
   const listingId = getListingIdFromPath()
   const listing = listings.find((item) => item.id === listingId)
+  const returnTo = `${window.location.pathname}?requestSwap=1`
+  const encodedReturnTo = encodeURIComponent(returnTo)
   const galleryPhotos = useMemo(() => {
     if (!listing) {
       return []
@@ -28,6 +33,24 @@ function ListingDetailPage() {
         .map((item) => item.imageSrc),
     ]
   }, [listing])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+
+    if (listing && isAuthenticated() && params.get('requestSwap') === '1') {
+      setIsEnquiryOpen(true)
+      window.history.replaceState(null, '', window.location.pathname)
+    }
+  }, [listing])
+
+  const handleRequestSwap = () => {
+    if (isAuthenticated()) {
+      setIsEnquiryOpen(true)
+      return
+    }
+
+    setIsSignInRequiredOpen(true)
+  }
 
   if (!listing) {
     return (
@@ -131,11 +154,9 @@ function ListingDetailPage() {
             </div>
 
             <OwnerContactCard
-              certification={sharedListingDetail.certification}
               listingTitle={listing.title}
               owner={sharedListingDetail.owner}
-              roadPoints={sharedListingDetail.roadPoints}
-              onOpenEnquiry={() => setIsEnquiryOpen(true)}
+              onOpenEnquiry={handleRequestSwap}
             />
           </div>
         </div>
@@ -143,6 +164,13 @@ function ListingDetailPage() {
 
       {isEnquiryOpen ? (
         <EnquiryModal listingTitle={listing.title} onClose={() => setIsEnquiryOpen(false)} />
+      ) : null}
+      {isSignInRequiredOpen ? (
+        <SignInRequiredModal
+          createAccountHref={`/sign-up?returnTo=${encodedReturnTo}`}
+          onClose={() => setIsSignInRequiredOpen(false)}
+          signInHref={`/sign-in?returnTo=${encodedReturnTo}`}
+        />
       ) : null}
     </main>
   )

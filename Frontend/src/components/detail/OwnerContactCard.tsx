@@ -1,5 +1,4 @@
 type OwnerContactCardProps = {
-  certification: string
   listingTitle: string
   owner: {
     about: string
@@ -8,15 +7,12 @@ type OwnerContactCardProps = {
     memberSince: string
     spokenLanguages: string
   }
-  roadPoints: string
   onOpenEnquiry: () => void
 }
 
 function OwnerContactCard({
-  certification,
   listingTitle,
   owner,
-  roadPoints,
   onOpenEnquiry,
 }: OwnerContactCardProps) {
   const initials = owner.displayName.slice(0, 2).toUpperCase()
