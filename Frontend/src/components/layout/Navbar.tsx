@@ -5,7 +5,7 @@ type NavbarProps = {
   variant?: 'overlay' | 'solid'
 }
 
-function Navbar({ activePage = 'home', variant = 'overlay' }: NavbarProps) {
+function Navbar({ activePage, variant = 'overlay' }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false)
   const isSolid = variant === 'solid' || isScrolled
 
@@ -25,7 +25,7 @@ function Navbar({ activePage = 'home', variant = 'overlay' }: NavbarProps) {
   return (
     <header
       className={`fixed top-0 left-0 z-20 flex h-24 w-full items-center justify-between px-6 transition-colors duration-300 md:h-28 md:px-20 ${
-        isSolid ? 'bg-white/90 shadow-lg shadow-gray-900/10 backdrop-blur-md' : 'bg-transparent'
+        isSolid ? 'bg-white/40 shadow-lg shadow-gray-900/10 backdrop-blur-md' : 'bg-transparent'
       }`}
     >
       <a

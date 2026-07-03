@@ -24,7 +24,8 @@ export type Listing = {
   imageSrc: string
   listingType: string
   currentLocation: string
-  lookingFor?: string
+  wantedAssets: string[]
+  wantedDestinations: string[]
   exchangeTypes: string[]
   description: string
 }
@@ -41,13 +42,13 @@ export type ListingFiltersValue = {
 }
 
 export const defaultListingFilters: ListingFiltersValue = {
-  availableFrom: '2026-06-01',
-  availableTo: '2026-10-01',
+  availableFrom: '2026-01-01',
+  availableTo: '2027-12-31',
   category: '',
   city: '',
   country: '',
   exchangeMethod: 'Direct Exchange',
-  exchangeTimings: [],
+  exchangeTimings: ['Simultaneous'],
   listingType: '',
 }
 
@@ -87,7 +88,8 @@ export const listings: Listing[] = [
     imageSrc: listing01,
     listingType: 'MotorHome/RV',
     currentLocation: 'Christchurch, New Zealand',
-    lookingFor: 'UK, US, AUS',
+    wantedAssets: ['MotorHome/RV', 'Campervan'],
+    wantedDestinations: ['United Kingdom', 'United States', 'Australia'],
     exchangeTypes: ['Simultaneous', 'Non-simultaneous'],
     description: 'A bright, easy-driving motorhome set up for family trips and long stays.',
   },
@@ -106,7 +108,8 @@ export const listings: Listing[] = [
     imageSrc: listing02,
     listingType: 'MotorHome/RV',
     currentLocation: 'Auckland, New Zealand',
-    lookingFor: 'US',
+    wantedAssets: ['MotorHome/RV'],
+    wantedDestinations: ['United States'],
     exchangeTypes: ['Simultaneous', 'Non-simultaneous'],
     description: 'Recently fitted interior, generous storage, and a comfortable layout for four.',
   },
@@ -125,6 +128,8 @@ export const listings: Listing[] = [
     imageSrc: listing03,
     listingType: 'MotorHome/RV',
     currentLocation: 'Wellington, New Zealand',
+    wantedAssets: ['MotorHome/RV', 'Holiday Home'],
+    wantedDestinations: ['Canada', 'Australia'],
     exchangeTypes: ['Non-simultaneous'],
     description: 'Near-new camper with premium finishes, compact handling, and coastal trip comfort.',
   },
@@ -143,7 +148,8 @@ export const listings: Listing[] = [
     imageSrc: listing04,
     listingType: 'MotorHome/RV',
     currentLocation: 'Hamilton, New Zealand',
-    lookingFor: 'Canada, UK',
+    wantedAssets: ['MotorHome/RV', 'Campervan'],
+    wantedDestinations: ['Canada', 'United Kingdom'],
     exchangeTypes: ['Simultaneous'],
     description: 'A character-filled campervan with a simple, reliable setup for relaxed coastal touring.',
   },
@@ -162,7 +168,8 @@ export const listings: Listing[] = [
     imageSrc: listing05,
     listingType: 'MotorHome/RV',
     currentLocation: 'Melbourne, Australia',
-    lookingFor: 'New Zealand, Canada',
+    wantedAssets: ['MotorHome/RV'],
+    wantedDestinations: ['New Zealand', 'Canada'],
     exchangeTypes: ['Non-simultaneous'],
     description: 'A tidy compact motorhome suited to couples who want an easy base for short scenic escapes.',
   },
@@ -181,7 +188,8 @@ export const listings: Listing[] = [
     imageSrc: listing06,
     listingType: 'MotorHome/RV',
     currentLocation: 'Calgary, Canada',
-    lookingFor: 'Australia, New Zealand',
+    wantedAssets: ['MotorHome/RV', 'Home'],
+    wantedDestinations: ['Australia', 'New Zealand'],
     exchangeTypes: ['Simultaneous'],
     description: 'A vintage-inspired motorhome for slow road trips, quiet campgrounds, and open landscapes.',
   },
@@ -200,7 +208,8 @@ export const listings: Listing[] = [
     imageSrc: listing07,
     listingType: 'MotorHome/RV',
     currentLocation: 'London, United Kingdom',
-    lookingFor: 'US, New Zealand',
+    wantedAssets: ['MotorHome/RV', 'Campervan'],
+    wantedDestinations: ['United States', 'New Zealand'],
     exchangeTypes: ['Simultaneous', 'Non-simultaneous'],
     description: 'A practical coachbuilt camper with generous living space and a clean, comfortable cabin.',
   },
@@ -219,7 +228,8 @@ export const listings: Listing[] = [
     imageSrc: listing08,
     listingType: 'MotorHome/RV',
     currentLocation: 'Manchester, United Kingdom',
-    lookingFor: 'Canada, Australia',
+    wantedAssets: ['MotorHome/RV'],
+    wantedDestinations: ['Canada', 'Australia'],
     exchangeTypes: ['Non-simultaneous'],
     description: 'A compact European campervan that is easy to park, easy to drive, and ready for village stays.',
   },
@@ -238,7 +248,8 @@ export const listings: Listing[] = [
     imageSrc: listing09,
     listingType: 'MotorHome/RV',
     currentLocation: 'San Francisco, United States',
-    lookingFor: 'New Zealand, UK',
+    wantedAssets: ['MotorHome/RV', 'Canal Boats'],
+    wantedDestinations: ['New Zealand', 'United Kingdom'],
     exchangeTypes: ['Simultaneous'],
     description: 'A rugged Sprinter-based camper for travelers who prefer gravel roads and remote trailheads.',
   },
@@ -257,7 +268,8 @@ export const listings: Listing[] = [
     imageSrc: listing10,
     listingType: 'MotorHome/RV',
     currentLocation: 'Montreal, Canada',
-    lookingFor: 'France, UK, Australia',
+    wantedAssets: ['MotorHome/RV', 'Holiday Home'],
+    wantedDestinations: ['France', 'United Kingdom', 'Australia'],
     exchangeTypes: ['Simultaneous', 'Non-simultaneous'],
     description: 'A distinctive classic van conversion with charm, compact facilities, and weekend-trip appeal.',
   },

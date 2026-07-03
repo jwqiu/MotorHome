@@ -10,12 +10,29 @@ import {
 } from '../components/listing/listingData'
 import Navbar from '../components/layout/Navbar'
 
+function getInitialFilters() {
+  const params = new URLSearchParams(window.location.search)
+
+  return {
+    ...defaultListingFilters,
+    category: params.get('category') ?? defaultListingFilters.category,
+    city: params.get('city') ?? defaultListingFilters.city,
+    country: params.get('country') ?? defaultListingFilters.country,
+    listingType: params.get('listingType') ?? defaultListingFilters.listingType,
+  }
+}
+
 function ListingsPage() {
-  const [appliedFilters, setAppliedFilters] = useState<ListingFiltersValue>(defaultListingFilters)
+  const [appliedFilters, setAppliedFilters] = useState<ListingFiltersValue>(getInitialFilters)
   const filteredListings = useMemo(
     () => listings.filter((listing) => listingMatchesFilters(listing, appliedFilters)),
     [appliedFilters],
   )
+
+  const handleApplyFilters = (filters: ListingFiltersValue) => {
+    setAppliedFilters(filters)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <main className="min-h-screen bg-white font-sans text-gray-600 antialiased">
@@ -32,8 +49,10 @@ function ListingsPage() {
             </h1>
           </div>
 
-          <div className="grid items-start gap-10 min-[1400px]:grid-cols-[420px_minmax(0,1fr)]">
-            <ListingFilters onApplyFilters={setAppliedFilters} />
+          <div className="grid items-start gap-10 xl:grid-cols-[400px_minmax(0,1fr)]">
+            <div className="2xl:sticky 2xl:top-32 2xl:max-h-[calc(100vh-9rem)] xl:overflow-y-auto xl:pr-2">
+              <ListingFilters initialFilters={appliedFilters} onApplyFilters={handleApplyFilters} />
+            </div>
             <div className="min-w-0">
               <ListingResults listings={filteredListings} />
               <div className="mt-8">

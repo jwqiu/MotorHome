@@ -9,7 +9,7 @@ function HomePage() {
   return (
     <main className="min-h-screen bg-white font-sans text-gray-600 antialiased">
       <div className="relative">
-        <Navbar />
+        <Navbar activePage="home" />
         <HeroSearchSection />
       </div>
       <BrowseListingsSection />

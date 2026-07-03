@@ -1,43 +1,63 @@
+import { listings } from '../listing/listingData'
+
 const categoryGroups = [
   {
     icon: '🚐',
     title: 'Recreational Vehicles',
-    items: ['Motorhomes', 'Campervans', 'Caravans'],
+    items: [
+      { label: 'Motorhomes', category: 'Vehicles', listingType: 'MotorHome/RV' },
+      { label: 'Campervans', category: 'Vehicles', listingType: 'Campervan' },
+      { label: 'Caravans', category: 'Vehicles', listingType: 'Caravan' },
+    ],
   },
   {
     icon: '🏡',
     title: 'Accommodation',
-    items: ['Homes', 'Holiday Homes'],
+    items: [
+      { label: 'Homes', category: 'Accommodation', listingType: 'Home' },
+      { label: 'Holiday Homes', category: 'Accommodation', listingType: 'Holiday Home' },
+    ],
   },
   {
     icon: '🛶',
     title: 'Canal Boats',
-    items: ['Canal Boats'],
+    items: [
+      { label: 'Canal Boats', category: 'Canal Boats', listingType: 'Canal Boats' },
+    ],
   },
 ]
 
-const latestListings = [
-  {
-    title: 'Coastal Motorhome',
-    location: 'Auckland',
-    postedAt: '2 days ago',
-  },
-  {
-    title: 'Family Holiday Home',
-    location: 'Queenstown',
-    postedAt: '3 days ago',
-  },
-  {
-    title: 'Compact Campervan',
-    location: 'Christchurch',
-    postedAt: '5 days ago',
-  },
-  {
-    title: 'Classic Canal Boat',
-    location: 'Hamilton',
-    postedAt: '1 week ago',
-  },
-]
+const latestListings = [listings[0], listings[2], listings[6], listings[9]]
+
+function buildCategoryHref(category: string, listingType: string) {
+  const params = new URLSearchParams({
+    category,
+    listingType,
+  })
+
+  return `/listings?${params.toString()}`
+}
+
+function getPostedAt(createdAt: string) {
+  const createdDate = new Date(`${createdAt}T00:00:00`)
+  const newestDate = new Date('2026-06-15T00:00:00')
+  const dayDifference = Math.max(
+    0,
+    Math.round((newestDate.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24)),
+  )
+
+  if (dayDifference === 0) {
+    return 'Today'
+  }
+
+  if (dayDifference < 7) {
+    return `${dayDifference} days ago`
+  }
+
+  const weekDifference = Math.floor(dayDifference / 7)
+
+  return `${weekDifference} ${weekDifference === 1 ? 'week' : 'weeks'} ago`
+}
 
 function BrowseListingsSection() {
   return (
@@ -70,12 +90,12 @@ function BrowseListingsSection() {
 
                 <ul className="m-0 list-none space-y-4 p-0">
                   {group.items.map((item) => (
-                    <li key={item}>
+                    <li key={item.label}>
                       <a
                         className="inline-flex font-semibold text-gray-500 no-underline transition-colors duration-200 hover:text-blue-500"
-                        href="/listings"
+                        href={buildCategoryHref(item.category, item.listingType)}
                       >
-                        {item}
+                        {item.label}
                       </a>
                     </li>
                   ))}
@@ -92,17 +112,27 @@ function BrowseListingsSection() {
 
           <div className="grid grid-cols-4 gap-10">
             {latestListings.map((listing) => (
-              <article
-                className="rounded-4xl bg-white p-4 shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105"
-                key={listing.title}
+              <a
+                className="rounded-4xl bg-white  text-gray-500 no-underline shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105"
+                href={`/listings/${listing.id}`}
+                key={listing.id}
               >
-                <div className="mb-4 h-[180px] rounded-4xl bg-gray-100" aria-hidden="true" />
-                <h4 className="mb-2 text-base font-bold text-gray-700">{listing.title}</h4>
-                <div className="flex items-center justify-between text-sm font-medium text-gray-500">
-                  <span>{listing.location}</span>
-                  <span>{listing.postedAt}</span>
+                <img
+                  className=" h-[180px] w-full rounded-t-4xl bg-gray-100 object-cover"
+                  src={listing.imageSrc}
+                  alt=""
+                />
+                <div className="flex flex-col gap-2 p-4">
+                  <h4 className="mb-2 line-clamp-2 min-h-[24px] text-base leading-6 font-bold text-gray-700">
+                    {listing.title}
+                  </h4>
+                  <div className="flex flex-col gap-1 text-sm font-medium text-gray-500 xl:flex-row xl:items-center xl:justify-between">
+                    <span>{listing.city}</span>
+                    <span>{getPostedAt(listing.createdAt)}</span>
+                  </div>
                 </div>
-              </article>
+              
+              </a>
             ))}
           </div>
         </div>

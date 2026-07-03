@@ -4,7 +4,7 @@ import ModernSelect from './ModernSelect'
 import type { ListingFiltersValue } from './listingData'
 
 const exchangeTypes = ['Simultaneous', 'Non-simultaneous']
-const exchangeMethods = ['Direct Exchange', 'Point Exchange']
+const exchangeMethods = ['Direct Exchange', 'Use Points']
 
 const citiesByCountry: Record<string, string[]> = {
   'New Zealand': ['Auckland', 'Wellington', 'Christchurch', 'Queenstown', 'Hamilton'],
@@ -21,20 +21,26 @@ const listingTypesByCategory: Record<string, string[]> = {
 }
 
 type ListingFiltersProps = {
+  initialFilters: ListingFiltersValue
   onApplyFilters: (filters: ListingFiltersValue) => void
 }
 
-function ListingFilters({ onApplyFilters }: ListingFiltersProps) {
-  const [selectedCountry, setSelectedCountry] = useState('')
-  const [selectedCity, setSelectedCity] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('')
-  const [selectedListingType, setSelectedListingType] = useState('')
-  const [selectedExchangeTimings, setSelectedExchangeTimings] = useState<string[]>([])
-  const [selectedExchangeMethod, setSelectedExchangeMethod] = useState('Direct Exchange')
+function ListingFilters({ initialFilters, onApplyFilters }: ListingFiltersProps) {
+  const initialExchangeTimings =
+    initialFilters.exchangeMethod === 'Direct Exchange' && initialFilters.exchangeTimings.length === 0
+      ? [exchangeTypes[0]]
+      : initialFilters.exchangeTimings
+  const [selectedCountry, setSelectedCountry] = useState(initialFilters.country)
+  const [selectedCity, setSelectedCity] = useState(initialFilters.city)
+  const [selectedCategory, setSelectedCategory] = useState(initialFilters.category)
+  const [selectedListingType, setSelectedListingType] = useState(initialFilters.listingType)
+  const [selectedExchangeTimings, setSelectedExchangeTimings] = useState<string[]>(initialExchangeTimings)
+  const [selectedExchangeMethod, setSelectedExchangeMethod] = useState(initialFilters.exchangeMethod)
   const [showPointExchangeHint, setShowPointExchangeHint] = useState(false)
+  const [showExchangeTimingHint, setShowExchangeTimingHint] = useState(false)
   const [showMoreFiltersHint, setShowMoreFiltersHint] = useState(false)
-  const [availableFrom, setAvailableFrom] = useState('2026-06-01')
-  const [availableTo, setAvailableTo] = useState('2026-10-01')
+  const [availableFrom, setAvailableFrom] = useState(initialFilters.availableFrom)
+  const [availableTo, setAvailableTo] = useState(initialFilters.availableTo)
 
   const countryOptions = Object.keys(citiesByCountry)
   const cityOptions = selectedCountry ? citiesByCountry[selectedCountry] : []
@@ -52,6 +58,17 @@ function ListingFilters({ onApplyFilters }: ListingFiltersProps) {
   }
 
   const toggleExchangeTiming = (timing: string) => {
+    if (
+      selectedExchangeMethod === 'Direct Exchange' &&
+      selectedExchangeTimings.includes(timing) &&
+      selectedExchangeTimings.length === 1
+    ) {
+      setShowExchangeTimingHint(true)
+      window.setTimeout(() => setShowExchangeTimingHint(false), 2600)
+      return
+    }
+
+    setShowExchangeTimingHint(false)
     setSelectedExchangeTimings((currentTimings) => (
       currentTimings.includes(timing)
         ? currentTimings.filter((currentTiming) => currentTiming !== timing)
@@ -60,7 +77,7 @@ function ListingFilters({ onApplyFilters }: ListingFiltersProps) {
   }
 
   const handleExchangeMethodClick = (method: string) => {
-    if (method === 'Point Exchange') {
+    if (method === 'Use Points') {
       setShowPointExchangeHint(true)
       window.setTimeout(() => setShowPointExchangeHint(false), 2600)
       return
@@ -72,6 +89,7 @@ function ListingFilters({ onApplyFilters }: ListingFiltersProps) {
     }
 
     setSelectedExchangeMethod(method)
+    setSelectedExchangeTimings((currentTimings) => (currentTimings.length > 0 ? currentTimings : [exchangeTypes[0]]))
   }
 
   const handleMoreFiltersClick = () => {
@@ -160,7 +178,7 @@ function ListingFilters({ onApplyFilters }: ListingFiltersProps) {
             <legend className="mb-4 text-sm font-extrabold text-gray-700">Exchange Method</legend>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {exchangeMethods.map((method) => {
-                const isPointExchange = method === 'Point Exchange'
+                const isPointExchange = method === 'Use Points'
                 const isSelected = selectedExchangeMethod === method
 
                 return (
@@ -197,11 +215,12 @@ function ListingFilters({ onApplyFilters }: ListingFiltersProps) {
             </div>
           </fieldset>
 
-          <fieldset className="border-0 p-0">
+          <fieldset className="relative border-0 p-0">
             <legend className="mb-4 text-sm font-extrabold text-gray-700">Exchange Timing</legend>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {exchangeTypes.map((type) => (
                 <button
+                  aria-describedby={showExchangeTimingHint ? 'exchange-timing-hint' : undefined}
                   aria-pressed={selectedExchangeTimings.includes(type)}
                   className={`inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-4xl border px-5 text-sm  transition-colors ${
                     selectedExchangeTimings.includes(type)
@@ -216,6 +235,15 @@ function ListingFilters({ onApplyFilters }: ListingFiltersProps) {
                 </button>
               ))}
             </div>
+            {showExchangeTimingHint ? (
+              <div
+                className="absolute right-0 bottom-[calc(100%+10px)] z-10 w-[230px] rounded-2xl bg-gray-800 px-4 py-3 text-xs leading-5 font-bold text-white shadow-lg shadow-gray-900/20"
+                id="exchange-timing-hint"
+                role="status"
+              >
+                Please select at least one exchange timing.
+              </div>
+            ) : null}
           </fieldset>
         </div>
 
