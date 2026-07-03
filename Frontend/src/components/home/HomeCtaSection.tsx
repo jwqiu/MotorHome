@@ -1,4 +1,8 @@
+import { isAuthenticated } from '../auth/authSession'
+
 function HomeCtaSection() {
+  const isSignedIn = isAuthenticated()
+
   return (
     <section className="w-full px-16 pb-16" aria-labelledby="home-cta-title">
       <h2
@@ -18,9 +22,9 @@ function HomeCtaSection() {
 
           <a
             className="inline-flex min-h-[42px] min-w-[150px] items-center justify-center rounded-4xl bg-blue-500 px-8 text-sm font-extrabold text-white no-underline transition-transform duration-200 hover:scale-110 hover:bg-blue-600"
-            href="/sign-up"
+            href={isSignedIn ? '/user-center' : '/sign-up'}
           >
-            Sign Up
+            {isSignedIn ? 'User Center' : 'Sign Up'}
           </a>
         </div>
     </section>

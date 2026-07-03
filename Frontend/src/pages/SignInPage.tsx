@@ -9,7 +9,7 @@ function SignInPage() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    signInSession()
+    signInSession(email.split('@')[0] || 'Member', email || 'member@example.com')
     const params = new URLSearchParams(window.location.search)
     window.location.href = params.get('returnTo') || '/'
   }
