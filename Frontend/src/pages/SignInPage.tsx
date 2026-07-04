@@ -1,17 +1,31 @@
 import { type FormEvent, useState } from 'react'
 import AuthShell from '../components/auth/AuthShell'
+import { login } from '../components/auth/authApi'
 import AuthTextField from '../components/auth/AuthTextField'
 import { signInSession } from '../components/auth/authSession'
 
 function SignInPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    signInSession(email.split('@')[0] || 'Member', email || 'member@example.com')
-    const params = new URLSearchParams(window.location.search)
-    window.location.href = params.get('returnTo') || '/'
+
+    setMessage('')
+    setIsSubmitting(true)
+
+    try {
+      const user = await login(email, password)
+      signInSession(user.id, user.userName, user.email, user.identityVerified)
+      const params = new URLSearchParams(window.location.search)
+      window.location.href = params.get('returnTo') || '/'
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to sign in.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -40,6 +54,12 @@ function SignInPage() {
           value={password}
         />
 
+        {message ? (
+          <p className="m-0 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+            {message}
+          </p>
+        ) : null}
+
         <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
           <a className="font-bold text-blue-500 no-underline hover:text-blue-600" href="/forgot-password">
             Forgot password?
@@ -53,10 +73,11 @@ function SignInPage() {
         </div>
 
         <button
-          className="font-outfit mt-2 h-14 cursor-pointer rounded-4xl border-0 bg-blue-500 text-xl font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600"
+          className="font-outfit mt-2 h-14 cursor-pointer rounded-4xl border-0 bg-blue-500 text-xl font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+          disabled={isSubmitting}
           type="submit"
         >
-          Sign In
+          {isSubmitting ? 'Signing In...' : 'Sign In'}
         </button>
       </form>
     </AuthShell>

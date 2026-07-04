@@ -12,6 +12,8 @@ Frontend/.env.*.local
 # .NET
 Backend/**/bin/
 Backend/**/obj/
+Backend/appsettings.json
+Backend/appsettings.Development.json
 
 # IDE
 .vs/

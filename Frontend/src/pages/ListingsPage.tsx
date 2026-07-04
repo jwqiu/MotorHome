@@ -1,13 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import ListingFilters from '../components/listing/ListingFilters'
 import ListingPagination from '../components/listing/ListingPagination'
 import ListingResults from '../components/listing/ListingResults'
-import {
-  defaultListingFilters,
-  listingMatchesFilters,
-  listings,
-  type ListingFiltersValue,
-} from '../components/listing/listingData'
+import { getListings } from '../components/listing/listingApi'
+import { defaultListingFilters, type Listing, type ListingFiltersValue } from '../components/listing/listingData'
 import Navbar from '../components/layout/Navbar'
 
 function getInitialFilters() {
@@ -15,19 +11,57 @@ function getInitialFilters() {
 
   return {
     ...defaultListingFilters,
+    availableFrom: params.get('availableFrom') ?? defaultListingFilters.availableFrom,
+    availableTo: params.get('availableTo') ?? defaultListingFilters.availableTo,
     category: params.get('category') ?? defaultListingFilters.category,
     city: params.get('city') ?? defaultListingFilters.city,
     country: params.get('country') ?? defaultListingFilters.country,
+    exchangeMethod: params.get('exchangeMethod') ?? defaultListingFilters.exchangeMethod,
+    exchangeTimings: params.getAll('exchangeTimings').length > 0
+      ? params.getAll('exchangeTimings')
+      : defaultListingFilters.exchangeTimings,
     listingType: params.get('listingType') ?? defaultListingFilters.listingType,
   }
 }
 
 function ListingsPage() {
   const [appliedFilters, setAppliedFilters] = useState<ListingFiltersValue>(getInitialFilters)
-  const filteredListings = useMemo(
-    () => listings.filter((listing) => listingMatchesFilters(listing, appliedFilters)),
-    [appliedFilters],
-  )
+  const [filteredListings, setFilteredListings] = useState<Listing[]>([])
+  const [isLoadingListings, setIsLoadingListings] = useState(true)
+  const [listingLoadMessage, setListingLoadMessage] = useState('')
+
+  useEffect(() => {
+    let shouldIgnoreResponse = false
+
+    setIsLoadingListings(true)
+    setListingLoadMessage('')
+
+    getListings(appliedFilters)
+      .then((nextListings) => {
+        if (shouldIgnoreResponse) {
+          return
+        }
+
+        setFilteredListings(nextListings)
+      })
+      .catch((error: Error) => {
+        if (shouldIgnoreResponse) {
+          return
+        }
+
+        setFilteredListings([])
+        setListingLoadMessage(error.message)
+      })
+      .finally(() => {
+        if (!shouldIgnoreResponse) {
+          setIsLoadingListings(false)
+        }
+      })
+
+    return () => {
+      shouldIgnoreResponse = true
+    }
+  }, [appliedFilters])
 
   const handleApplyFilters = (filters: ListingFiltersValue) => {
     setAppliedFilters(filters)
@@ -54,7 +88,18 @@ function ListingsPage() {
               <ListingFilters initialFilters={appliedFilters} onApplyFilters={handleApplyFilters} />
             </div>
             <div className="min-w-0">
-              <ListingResults listings={filteredListings} />
+              {listingLoadMessage ? (
+                <div className="mb-6 rounded-3xl bg-red-50 px-6 py-4 text-sm font-extrabold text-red-500">
+                  {listingLoadMessage}
+                </div>
+              ) : null}
+              {isLoadingListings ? (
+                <div className="rounded-4xl bg-white p-10 text-center shadow-lg shadow-blue-100">
+                  <p className="font-outfit m-0 text-2xl font-extrabold text-gray-800">Loading listings...</p>
+                </div>
+              ) : (
+                <ListingResults listings={filteredListings} />
+              )}
               <div className="mt-8">
                 <ListingPagination totalListings={filteredListings.length} />
               </div>

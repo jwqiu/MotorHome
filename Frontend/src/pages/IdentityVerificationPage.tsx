@@ -1,5 +1,11 @@
-import { useState } from 'react'
-import { isAuthenticated, setIdentityVerified } from '../components/auth/authSession'
+import { useEffect, useState } from 'react'
+import {
+  getSessionUserEmail,
+  isAuthenticated,
+  setIdentityVerified,
+} from '../components/auth/authSession'
+import { verifyIdentity } from '../components/auth/verificationApi'
+import ModernDateInput from '../components/listing/ModernDateInput'
 import Navbar from '../components/layout/Navbar'
 
 function IdentityVerificationPage() {
@@ -10,28 +16,81 @@ function IdentityVerificationPage() {
   const [versionNumber, setVersionNumber] = useState('')
   const [frontLicence, setFrontLicence] = useState<File | null>(null)
   const [backLicence, setBackLicence] = useState<File | null>(null)
+  const [frontLicencePreviewUrl, setFrontLicencePreviewUrl] = useState('')
+  const [backLicencePreviewUrl, setBackLicencePreviewUrl] = useState('')
   const [isConfirmed, setIsConfirmed] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPassportHint, setShowPassportHint] = useState(false)
+  const [message, setMessage] = useState('')
   const returnTo = new URLSearchParams(window.location.search).get('returnTo')
 
-  const canSubmit = Boolean(
-    legalFirstName &&
-    legalLastName &&
-    dateOfBirth &&
-    licenceNumber &&
-    versionNumber &&
-    frontLicence &&
-    backLicence &&
-    isConfirmed,
-  )
-
-  const handleSubmit = () => {
-    if (!canSubmit) {
+  useEffect(() => {
+    if (!frontLicence) {
+      setFrontLicencePreviewUrl('')
       return
     }
 
-    setIdentityVerified()
-    window.location.href = returnTo || '/user-center'
+    const previewUrl = URL.createObjectURL(frontLicence)
+    setFrontLicencePreviewUrl(previewUrl)
+
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [frontLicence])
+
+  useEffect(() => {
+    if (!backLicence) {
+      setBackLicencePreviewUrl('')
+      return
+    }
+
+    const previewUrl = URL.createObjectURL(backLicence)
+    setBackLicencePreviewUrl(previewUrl)
+
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [backLicence])
+
+  const verificationRequirements = [
+    { isComplete: Boolean(legalFirstName.trim()), label: 'legal first name' },
+    { isComplete: Boolean(legalLastName.trim()), label: 'legal last name' },
+    { isComplete: Boolean(dateOfBirth), label: 'date of birth' },
+    { isComplete: Boolean(licenceNumber.trim()), label: 'licence number' },
+    { isComplete: Boolean(versionNumber.trim()), label: 'version number' },
+    { isComplete: Boolean(frontLicence), label: 'front licence image' },
+    { isComplete: Boolean(backLicence), label: 'back licence image' },
+    { isComplete: isConfirmed, label: 'confirmation checkbox' },
+  ]
+  const missingRequirements = verificationRequirements
+    .filter((requirement) => !requirement.isComplete)
+    .map((requirement) => requirement.label)
+  const canSubmit = missingRequirements.length === 0
+
+  const handleSubmit = async () => {
+    if (!canSubmit || !frontLicence || !backLicence) {
+      return
+    }
+
+    setMessage('')
+    setIsSubmitting(true)
+
+    try {
+      await verifyIdentity({
+        backLicenceFileName: backLicence.name,
+        confirmationAccepted: isConfirmed,
+        dateOfBirth,
+        email: getSessionUserEmail(),
+        frontLicenceFileName: frontLicence.name,
+        legalFirstName,
+        legalLastName,
+        licenceNumber,
+        versionNumber,
+      })
+
+      setIdentityVerified()
+      window.location.href = returnTo || '/user-center'
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to submit verification.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handlePassportClick = () => {
@@ -59,7 +118,7 @@ function IdentityVerificationPage() {
             Verify your identity.
           </h1>
           <p className="mt-4 mb-0 max-w-[720px] text-sm leading-7 text-gray-500">
-            This front-end form is a temporary verification flow for the MVP. Submitting it will mark your account as verified for now.
+            This is a temporary verification flow for the MVP. Submitting all required details will mark your account as verified for now.
           </p>
 
           <section className="mt-8 rounded-4xl bg-white p-7 shadow-lg shadow-blue-100 md:p-8">
@@ -119,10 +178,9 @@ function IdentityVerificationPage() {
                 </div>
                 <label className="grid gap-2 text-sm font-extrabold text-gray-700 md:grid-cols-[220px_1fr] md:items-center">
                   <span>Date of birth</span>
-                  <input
-                    className="h-12 rounded-3xl border border-blue-100 px-4 text-sm font-semibold text-gray-700 placeholder:text-gray-300 outline-none focus:border-blue-400"
-                    onChange={(event) => setDateOfBirth(event.target.value)}
-                    type="date"
+                  <ModernDateInput
+                    ariaLabel="Date of birth"
+                    onChange={setDateOfBirth}
                     value={dateOfBirth}
                   />
                 </label>
@@ -150,8 +208,21 @@ function IdentityVerificationPage() {
               <div className="grid gap-4">
                 <label className="grid gap-2 text-sm font-extrabold text-gray-700 md:grid-cols-[220px_1fr] md:items-start">
                   <span className="md:pt-5">Upload front of licence</span>
-                  <span className="flex min-h-28 cursor-pointer items-center justify-center rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-center text-sm font-bold text-gray-500 transition hover:bg-blue-50">
-                    {frontLicence ? frontLicence.name : 'Choose front image'}
+                  <span className="relative flex min-h-28 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-center text-sm font-bold text-gray-500 transition hover:bg-blue-50">
+                    {frontLicencePreviewUrl ? (
+                      <>
+                        <img
+                          alt="Front of licence preview"
+                          className="absolute inset-0 h-full w-full object-cover"
+                          src={frontLicencePreviewUrl}
+                        />
+                        <span className="relative z-10 rounded-3xl bg-white/85 px-4 py-2 text-gray-700 shadow-md shadow-gray-900/10">
+                          {frontLicence?.name}
+                        </span>
+                      </>
+                    ) : (
+                      'Choose front image'
+                    )}
                     <input
                       accept="image/*"
                       className="sr-only"
@@ -162,8 +233,21 @@ function IdentityVerificationPage() {
                 </label>
                 <label className="grid gap-2 text-sm font-extrabold text-gray-700 md:grid-cols-[220px_1fr] md:items-start">
                   <span className="md:pt-5">Upload back of licence</span>
-                  <span className="flex min-h-28 cursor-pointer items-center justify-center rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-center text-sm font-bold text-gray-500 transition hover:bg-blue-50">
-                    {backLicence ? backLicence.name : 'Choose back image'}
+                  <span className="relative flex min-h-28 cursor-pointer items-center justify-center overflow-hidden rounded-3xl border border-dashed border-blue-200 bg-blue-50/50 px-4 py-5 text-center text-sm font-bold text-gray-500 transition hover:bg-blue-50">
+                    {backLicencePreviewUrl ? (
+                      <>
+                        <img
+                          alt="Back of licence preview"
+                          className="absolute inset-0 h-full w-full object-cover"
+                          src={backLicencePreviewUrl}
+                        />
+                        <span className="relative z-10 rounded-3xl bg-white/85 px-4 py-2 text-gray-700 shadow-md shadow-gray-900/10">
+                          {backLicence?.name}
+                        </span>
+                      </>
+                    ) : (
+                      'Choose back image'
+                    )}
                     <input
                       accept="image/*"
                       className="sr-only"
@@ -189,11 +273,11 @@ function IdentityVerificationPage() {
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   className="font-outfit h-12 cursor-pointer rounded-4xl border-0 bg-blue-500 px-8 text-sm font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
-                  disabled={!canSubmit}
+                  disabled={!canSubmit || isSubmitting}
                   onClick={handleSubmit}
                   type="button"
                 >
-                  Submit for verification
+                  {isSubmitting ? 'Submitting...' : 'Submit for verification'}
                 </button>
                 {!returnTo ? (
                   <a className="text-sm font-extrabold text-gray-400 no-underline hover:text-gray-600" href="/user-center">
@@ -201,6 +285,16 @@ function IdentityVerificationPage() {
                   </a>
                 ) : null}
               </div>
+              {!canSubmit ? (
+                <p className="m-0 text-xs leading-5 text-gray-400">
+                  Complete the missing fields to submit: {missingRequirements.join(', ')}.
+                </p>
+              ) : null}
+              {message ? (
+                <p className="m-0 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+                  {message}
+                </p>
+              ) : null}
             </form>
           </section>
         </div>

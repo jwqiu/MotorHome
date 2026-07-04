@@ -1,23 +1,42 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import DetailGallery from '../components/detail/DetailGallery'
 import EnquiryModal from '../components/detail/EnquiryModal'
+import { getEnquiryStatus } from '../components/detail/enquiryApi'
 import ListingDetailSections from '../components/detail/ListingDetailSections'
 import OwnerContactCard from '../components/detail/OwnerContactCard'
 import SignInRequiredModal from '../components/detail/SignInRequiredModal'
 import { sharedListingDetail } from '../components/detail/listingDetailData'
-import { isAuthenticated } from '../components/auth/authSession'
-import { listings } from '../components/listing/listingData'
+import { getSessionUserId, isAuthenticated } from '../components/auth/authSession'
+import { getListingDetail } from '../components/listing/listingApi'
+import { getListingPlaceholderImage, listings } from '../components/listing/listingData'
 import Navbar from '../components/layout/Navbar'
 
 function getListingIdFromPath() {
   return window.location.pathname.split('/').filter(Boolean)[1] ?? ''
 }
 
+function getAvailabilityText(listing: { availableFrom: string, availableTo: string }) {
+  if (listing.availableFrom && listing.availableTo) {
+    return `${listing.availableFrom} to ${listing.availableTo}`
+  }
+
+  return 'please contact the owner for availability information.'
+}
+
 function ListingDetailPage() {
   const [isEnquiryOpen, setIsEnquiryOpen] = useState(false)
   const [isSignInRequiredOpen, setIsSignInRequiredOpen] = useState(false)
+  const [isEnquirySuccessVisible, setIsEnquirySuccessVisible] = useState(false)
+  const [isEnquiryPending, setIsEnquiryPending] = useState(false)
+  const [isEnquiryStatusLoading, setIsEnquiryStatusLoading] = useState(false)
+  const [dynamicListingDetail, setDynamicListingDetail] = useState<Awaited<ReturnType<typeof getListingDetail>> | null>(null)
+  const enquirySuccessTimerRef = useRef<number | null>(null)
   const listingId = getListingIdFromPath()
-  const listing = listings.find((item) => item.id === listingId)
+  const fallbackListing = listings.find((item) => item.id === listingId)
+  const listing = dynamicListingDetail?.listing ?? fallbackListing
+  const owner = dynamicListingDetail?.owner ?? sharedListingDetail.owner
+  const currentUserId = getSessionUserId()
+  const isOwnListing = Boolean(currentUserId && dynamicListingDetail?.owner.id === currentUserId)
   const returnTo = `${window.location.pathname}?requestSwap=1`
   const encodedReturnTo = encodeURIComponent(returnTo)
   const galleryPhotos = useMemo(() => {
@@ -27,23 +46,123 @@ function ListingDetailPage() {
 
     return [
       listing.imageSrc,
-      ...listings
-        .filter((item) => item.id !== listing.id)
-        .slice(0, 4)
-        .map((item) => item.imageSrc),
+      getListingPlaceholderImage(),
+      getListingPlaceholderImage(),
+      getListingPlaceholderImage(),
+      getListingPlaceholderImage(),
     ]
   }, [listing])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
+    let isActive = true
 
-    if (listing && isAuthenticated() && params.get('requestSwap') === '1') {
-      setIsEnquiryOpen(true)
-      window.history.replaceState(null, '', window.location.pathname)
+    setDynamicListingDetail(null)
+
+    getListingDetail(listingId)
+      .then((detail) => {
+        if (isActive) {
+          setDynamicListingDetail(detail)
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setDynamicListingDetail(null)
+        }
+      })
+
+    return () => {
+      isActive = false
     }
-  }, [listing])
+  }, [listingId])
+
+  useEffect(() => {
+    let isActive = true
+    const params = new URLSearchParams(window.location.search)
+    const shouldOpenEnquiry = params.get('requestSwap') === '1'
+
+    if (!listing || !isAuthenticated()) {
+      setIsEnquiryPending(false)
+      setIsEnquiryStatusLoading(false)
+      if (shouldOpenEnquiry) {
+        window.history.replaceState(null, '', window.location.pathname)
+      }
+
+      return () => {
+        isActive = false
+      }
+    }
+
+    const senderId = getSessionUserId()
+
+    if (!senderId || isOwnListing) {
+      setIsEnquiryPending(false)
+      setIsEnquiryStatusLoading(false)
+      return () => {
+        isActive = false
+      }
+    }
+
+    setIsEnquiryStatusLoading(true)
+
+    getEnquiryStatus(listing.listingId, senderId)
+      .then((response) => {
+        if (!isActive) {
+          return
+        }
+
+        setIsEnquiryPending(response.hasPendingEnquiry)
+
+        if (shouldOpenEnquiry && !response.hasPendingEnquiry) {
+          setIsEnquiryOpen(true)
+        }
+
+        if (shouldOpenEnquiry) {
+          window.history.replaceState(null, '', window.location.pathname)
+        }
+      })
+      .catch(() => {
+        if (isActive) {
+          setIsEnquiryPending(false)
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsEnquiryStatusLoading(false)
+        }
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [isOwnListing, listing])
+
+  useEffect(() => {
+    return () => {
+      if (enquirySuccessTimerRef.current !== null) {
+        window.clearTimeout(enquirySuccessTimerRef.current)
+      }
+    }
+  }, [])
+
+  const handleEnquirySubmitted = () => {
+    setIsEnquiryPending(true)
+    setIsEnquirySuccessVisible(true)
+
+    if (enquirySuccessTimerRef.current !== null) {
+      window.clearTimeout(enquirySuccessTimerRef.current)
+    }
+
+    enquirySuccessTimerRef.current = window.setTimeout(() => {
+      setIsEnquirySuccessVisible(false)
+      enquirySuccessTimerRef.current = null
+    }, 3000)
+  }
 
   const handleRequestSwap = () => {
+    if (isEnquiryPending || isEnquiryStatusLoading) {
+      return
+    }
+
     if (isAuthenticated()) {
       setIsEnquiryOpen(true)
       return
@@ -109,7 +228,7 @@ function ListingDetailPage() {
                     </svg>
                     <dt className="text-sm text-gray-800 ">Availability</dt>
                     <dd className="m-0 text-sm text-gray-400 whitespace-nowrap">
-                      please contact the owner for availability information.
+                      {getAvailabilityText(listing)}
                     </dd>
                   </div>
                   <hr className="my-2 border-t border-gray-200" />
@@ -134,7 +253,7 @@ function ListingDetailPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 0 0 3.7 3.7 48.656 48.656 0 0 0 7.324 0 4.006 4.006 0 0 0 3.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3-3 3" />
                     </svg>
                     <div className="flex items-center gap-4">
-                      <dd className="">
+                      <dd className="flex flex-wrap gap-2">
                         {listing.wantedAssets.map((asset) => (
                           <span className="rounded-4xl bg-gray-100 shadow-md px-3 py-1.5 text-xs text-gray-600" key={asset}>
                             {asset}
@@ -155,7 +274,10 @@ function ListingDetailPage() {
 
             <OwnerContactCard
               listingTitle={listing.title}
-              owner={sharedListingDetail.owner}
+              isEnquiryPending={isEnquiryPending}
+              isEnquiryStatusLoading={isEnquiryStatusLoading}
+              isOwnListing={isOwnListing}
+              owner={owner}
               onOpenEnquiry={handleRequestSwap}
             />
           </div>
@@ -163,7 +285,12 @@ function ListingDetailPage() {
       </section>
 
       {isEnquiryOpen ? (
-        <EnquiryModal listingTitle={listing.title} onClose={() => setIsEnquiryOpen(false)} />
+        <EnquiryModal
+          listingId={listing.listingId}
+          listingTitle={listing.title}
+          onClose={() => setIsEnquiryOpen(false)}
+          onSubmitted={handleEnquirySubmitted}
+        />
       ) : null}
       {isSignInRequiredOpen ? (
         <SignInRequiredModal
@@ -171,6 +298,16 @@ function ListingDetailPage() {
           onClose={() => setIsSignInRequiredOpen(false)}
           signInHref={`/sign-in?returnTo=${encodedReturnTo}`}
         />
+      ) : null}
+      {isEnquirySuccessVisible ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/15 px-6 backdrop-blur-sm">
+          <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-3xl border border-emerald-100 bg-white px-6 py-4 text-center shadow-2xl shadow-gray-900/20">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <p className="m-0 text-sm font-extrabold">Request sent successfully</p>
+          </div>
+        </div>
       ) : null}
     </main>
   )

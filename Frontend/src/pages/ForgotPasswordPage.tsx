@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import AuthShell from '../components/auth/AuthShell'
+import { resetPassword } from '../components/auth/authApi'
 import AuthTextField from '../components/auth/AuthTextField'
 
 function ForgotPasswordPage() {
@@ -10,6 +11,7 @@ function ForgotPasswordPage() {
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [isCodeVerified, setIsCodeVerified] = useState(false)
   const [isPasswordUpdated, setIsPasswordUpdated] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [redirectCountdown, setRedirectCountdown] = useState(3)
   const [message, setMessage] = useState('')
   const passwordsDoNotMatch = Boolean(confirmPassword) && password !== confirmPassword
@@ -55,7 +57,7 @@ function ForgotPasswordPage() {
     setMessage('')
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!password || !confirmPassword) {
@@ -68,7 +70,17 @@ function ForgotPasswordPage() {
       return
     }
 
-    setIsPasswordUpdated(true)
+    setMessage('')
+    setIsSubmitting(true)
+
+    try {
+      await resetPassword(email, password, verificationCode)
+      setIsPasswordUpdated(true)
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to update your password.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const goToSignIn = () => {
@@ -78,7 +90,7 @@ function ForgotPasswordPage() {
   return (
     <AuthShell
       eyebrow="Password help"
-      subtitle="Enter your email, verify the code, and set a new password. This is a front-end only flow for now."
+      subtitle="Enter your email, verify the code, and set a new password."
       title="Reset your account password."
     >
       {!isCodeVerified ? (
@@ -173,10 +185,10 @@ function ForgotPasswordPage() {
 
           <button
             className="font-outfit mt-2 h-14 cursor-pointer rounded-4xl border-0 bg-blue-500 text-xl font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
-            disabled={!canUpdatePassword}
+            disabled={!canUpdatePassword || isSubmitting}
             type="submit"
           >
-            Update Password
+            {isSubmitting ? 'Updating Password...' : 'Update Password'}
           </button>
         </form>
       )}

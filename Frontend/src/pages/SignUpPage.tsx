@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import AuthShell from '../components/auth/AuthShell'
+import { signUp } from '../components/auth/authApi'
 import AuthTextField from '../components/auth/AuthTextField'
 import { signInSession } from '../components/auth/authSession'
 
@@ -11,6 +12,7 @@ function SignUpPage() {
   const [verificationCode, setVerificationCode] = useState('')
   const [isCodeSent, setIsCodeSent] = useState(false)
   const [isCodeVerified, setIsCodeVerified] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
   const passwordsDoNotMatch = Boolean(confirmPassword) && password !== confirmPassword
   const canSendCode = Boolean(name && email)
@@ -44,7 +46,7 @@ function SignUpPage() {
     setMessage('')
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     if (!password || !confirmPassword) {
@@ -57,9 +59,19 @@ function SignUpPage() {
       return
     }
 
-    signInSession(name || 'Member', email || 'member@example.com')
-    const params = new URLSearchParams(window.location.search)
-    window.location.href = params.get('returnTo') || '/'
+    setMessage('')
+    setIsSubmitting(true)
+
+    try {
+      const user = await signUp(name, email, password, verificationCode)
+      signInSession(user.id, user.userName, user.email, user.identityVerified)
+      const params = new URLSearchParams(window.location.search)
+      window.location.href = params.get('returnTo') || '/'
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Unable to create your account.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -168,10 +180,10 @@ function SignUpPage() {
 
           <button
             className="font-outfit mt-2 h-14 cursor-pointer rounded-4xl border-0 bg-blue-500 text-xl font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
-            disabled={!canCompleteRegistration}
+            disabled={!canCompleteRegistration || isSubmitting}
             type="submit"
           >
-            Complete Registration
+            {isSubmitting ? 'Creating Account...' : 'Complete Registration'}
           </button>
         </form>
       )}

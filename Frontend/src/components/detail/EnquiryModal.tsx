@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { isIdentityVerified } from '../auth/authSession'
+import { getSessionUserEmail, getSessionUserId, getSessionUserName, isIdentityVerified } from '../auth/authSession'
 import ModernSelect from '../listing/ModernSelect'
+import { getExchangeListings, submitEnquiry, type ExchangeListingResponse } from './enquiryApi'
 
 type EnquiryModalProps = {
+  listingId: number
   listingTitle: string
   onClose: () => void
+  onSubmitted: () => void
 }
 
-const userListings: string[] = []
 const ENQUIRY_DRAFT_KEY = 'mt-exchange-enquiry-draft'
 
 type EnquiryDraft = {
@@ -20,23 +22,33 @@ type EnquiryDraft = {
   selectedUserListing: string
 }
 
-function EnquiryModal({ listingTitle, onClose }: EnquiryModalProps) {
+function EnquiryModal({ listingId, listingTitle, onClose, onSubmitted }: EnquiryModalProps) {
   const identityVerified = isIdentityVerified()
+  const sessionUserId = getSessionUserId()
+  const sessionUserName = getSessionUserName()
+  const sessionUserEmail = getSessionUserEmail()
   const [exchangeMethod, setExchangeMethod] = useState('Direct Exchange')
-  const [selectedUserListing, setSelectedUserListing] = useState(userListings.length === 1 ? userListings[0] : '')
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
+  const [userListings, setUserListings] = useState<ExchangeListingResponse[]>([])
+  const [selectedUserListing, setSelectedUserListing] = useState('')
+  const [isUserListingsLoading, setIsUserListingsLoading] = useState(false)
+  const [userListingsMessage, setUserListingsMessage] = useState('')
+  const [name, setName] = useState(sessionUserName)
+  const [email, setEmail] = useState(sessionUserEmail)
   const [message, setMessage] = useState('')
   const [isDisclaimerAccepted, setIsDisclaimerAccepted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showPointExchangeHint, setShowPointExchangeHint] = useState(false)
   const hasUserListings = userListings.length > 0
+  const selectedUserListingId = Number(selectedUserListing)
   const canSendRequest = Boolean(
-    name &&
-    email &&
-    message &&
+    name.trim() &&
+    email.trim() &&
+    sessionUserId &&
+    message.trim() &&
     isDisclaimerAccepted &&
     identityVerified &&
-    (exchangeMethod !== 'Direct Exchange' || selectedUserListing),
+    !isUserListingsLoading &&
+    (!hasUserListings || selectedUserListing),
   )
 
   useEffect(() => {
@@ -54,16 +66,60 @@ function EnquiryModal({ listingTitle, onClose }: EnquiryModalProps) {
       }
 
       setExchangeMethod(parsedDraft.exchangeMethod || 'Direct Exchange')
-      setSelectedUserListing(parsedDraft.selectedUserListing || (userListings.length === 1 ? userListings[0] : ''))
-      setName(parsedDraft.name || '')
-      setEmail(parsedDraft.email || '')
+      setSelectedUserListing(parsedDraft.selectedUserListing || '')
+      setName(parsedDraft.name || sessionUserName)
+      setEmail(sessionUserEmail)
       setMessage(parsedDraft.message || '')
       setIsDisclaimerAccepted(Boolean(parsedDraft.isDisclaimerAccepted))
       window.sessionStorage.removeItem(ENQUIRY_DRAFT_KEY)
     } catch {
       window.sessionStorage.removeItem(ENQUIRY_DRAFT_KEY)
     }
-  }, [listingTitle])
+  }, [listingTitle, sessionUserEmail, sessionUserName])
+
+  useEffect(() => {
+    let isActive = true
+
+    if (!sessionUserId) {
+      return () => {
+        isActive = false
+      }
+    }
+
+    setIsUserListingsLoading(true)
+    setUserListingsMessage('')
+
+    getExchangeListings(sessionUserId, listingId)
+      .then((listings) => {
+        if (!isActive) {
+          return
+        }
+
+        setUserListings(listings)
+        setSelectedUserListing((currentValue) => {
+          if (currentValue && listings.some((listing) => String(listing.listingId) === currentValue)) {
+            return currentValue
+          }
+
+          return listings.length === 1 ? String(listings[0].listingId) : ''
+        })
+      })
+      .catch((error) => {
+        if (isActive) {
+          setUserListings([])
+          setUserListingsMessage(error instanceof Error ? error.message : 'Unable to load your listings.')
+        }
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsUserListingsLoading(false)
+        }
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [listingId, sessionUserId])
 
   const handleExchangeMethodClick = (method: string) => {
     if (method === 'Use Points') {
@@ -90,6 +146,35 @@ function EnquiryModal({ listingTitle, onClose }: EnquiryModalProps) {
 
     window.sessionStorage.setItem(ENQUIRY_DRAFT_KEY, JSON.stringify(draft))
     window.location.href = `/user-center/verification?returnTo=${encodeURIComponent(returnTo)}`
+  }
+
+  const handleSubmit = async () => {
+    if (!canSendRequest) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await submitEnquiry({
+        disclaimerAccepted: isDisclaimerAccepted,
+        enquiryType: exchangeMethod,
+        listingId,
+        message: message.trim(),
+        offeredListingId: Number.isInteger(selectedUserListingId) && selectedUserListingId > 0
+          ? selectedUserListingId
+          : undefined,
+        senderId: sessionUserId,
+        senderName: name.trim(),
+      })
+
+      onSubmitted()
+      onClose()
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to send enquiry.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -161,19 +246,26 @@ function EnquiryModal({ listingTitle, onClose }: EnquiryModalProps) {
 
           {exchangeMethod === 'Direct Exchange' ? (
             hasUserListings ? (
-              <label className="grid gap-2 text-sm font-extrabold text-gray-700">
-                Your listing to exchange
+              <div className="grid items-center gap-3 sm:grid-cols-[180px_1fr]">
+                <p className="m-0 text-sm font-extrabold text-gray-700">Your listing to exchange</p>
                 <ModernSelect
                   ariaLabel="Your listing to exchange"
                   onChange={setSelectedUserListing}
-                  options={userListings}
+                  options={userListings.map((listing) => ({
+                    label: listing.title,
+                    value: String(listing.listingId),
+                  }))}
                   placeholder="Select your listing"
                   value={selectedUserListing}
                 />
-              </label>
+              </div>
+            ) : isUserListingsLoading ? (
+              <div className="rounded-3xl text-sm text-gray-400">
+                Loading your listings...
+              </div>
             ) : (
               <div className="rounded-3xl  text-sm text-gray-400">
-                You don&apos;t have an existing listing to exchange.
+                {userListingsMessage || "You don't have an existing listing to exchange."}
               </div>
             )
           ) : null}
@@ -218,8 +310,8 @@ function EnquiryModal({ listingTitle, onClose }: EnquiryModalProps) {
             <label className="grid gap-2 text-sm font-extrabold text-gray-700">
               Email
               <input
-                className="h-11 rounded-3xl border border-blue-100 px-4 text-sm font-semibold text-gray-700 outline-none focus:border-blue-400"
-                onChange={(event) => setEmail(event.target.value)}
+                className="h-11 rounded-3xl border border-blue-100 bg-gray-50 px-4 text-sm font-semibold text-gray-500 outline-none"
+                readOnly
                 type="email"
                 value={email}
               />
@@ -259,10 +351,11 @@ function EnquiryModal({ listingTitle, onClose }: EnquiryModalProps) {
 
           <button
             className="font-outfit mt-1 h-12 cursor-pointer rounded-4xl border-0 bg-blue-500 text-lg font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
-            disabled={!canSendRequest}
+            disabled={!canSendRequest || isSubmitting}
+            onClick={handleSubmit}
             type="button"
           >
-            Send Request
+            {isSubmitting ? 'Sending...' : 'Send Request'}
           </button>
         </form>
       </div>

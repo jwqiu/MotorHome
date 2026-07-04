@@ -41,6 +41,21 @@ macOS with Homebrew:
 brew install --cask dotnet-sdk
 ```
 
+Create the local PostgreSQL database and apply the schema:
+
+```bash
+createdb motorhome
+psql -d motorhome -f database/001_schema_and_seed.sql
+```
+
+The backend default connection string is in `Backend/appsettings.Development.json`:
+
+```text
+Host=localhost;Port=5432;Database=motorhome;Username=postgres;Password=postgres
+```
+
+Update it if your local PostgreSQL username or password is different.
+
 ## Start Frontend And Backend Together
 
 From the project root, run:

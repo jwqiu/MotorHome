@@ -4,7 +4,7 @@ export type ReceivedEnquiryStatus = 'Pending' | 'Agreed' | 'Declined'
 
 export type ReceivedEnquiry = {
   dateReceived: string
-  id: string
+  id: number
   message: string
   senderEmail: string
   senderListing: Listing
@@ -17,7 +17,7 @@ export type ReceivedEnquiry = {
 export const receivedEnquiries: ReceivedEnquiry[] = [
   {
     dateReceived: '09 Feb',
-    id: 'tom-to-family-motorhome',
+    id: 4,
     message: 'We are planning a family road trip and would love to discuss a direct exchange. Your motorhome looks like a strong fit for our travel dates, and our vehicle is available for the same period.',
     senderEmail: 'tom@example.com',
     senderListing: listings[8],
@@ -28,7 +28,7 @@ export const receivedEnquiries: ReceivedEnquiry[] = [
   },
   {
     dateReceived: '18 Apr',
-    id: 'mia-to-modern-family',
+    id: 5,
     message: 'Your Christchurch motorhome would work perfectly for our South Island plans. We can offer a well-equipped camper with flexible dates.',
     senderEmail: 'mia@example.com',
     senderListing: listings[4],

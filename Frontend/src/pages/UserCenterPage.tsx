@@ -1,85 +1,152 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   getSessionUserEmail,
+  getSessionUserId,
   getSessionUserName,
   isIdentityVerified,
   isAuthenticated,
 } from '../components/auth/authSession'
-import { listings } from '../components/listing/listingData'
+import { getProfile, updateIntroduction } from '../components/auth/profileApi'
+import { cancelEnquiry, getUserEnquiries, type UserEnquiryItemResponse } from '../components/detail/enquiryApi'
+import { listingFromEnquirySummary } from '../components/detail/enquiryListingMapper'
+import { deleteListing, getOwnerListings } from '../components/listing/listingApi'
+import type { Listing } from '../components/listing/listingData'
 import Navbar from '../components/layout/Navbar'
-import { getReceivedStatusDescription, receivedEnquiries } from '../components/userCenter/userCenterData'
+import { getReceivedStatusDescription, type ReceivedEnquiry, type ReceivedEnquiryStatus } from '../components/userCenter/userCenterData'
 
 type UserCenterTab = 'profile' | 'listings' | 'sent' | 'received'
 type SentEnquiryStatus = 'Pending' | 'Agreed' | 'Declined' | 'Cancelled'
 type SentEnquiry = {
   contactEmail?: string
   date: string
-  listing: (typeof listings)[number]
+  id: number
+  listing: Listing
   message: string
-  offeredListing: (typeof listings)[number]
+  offeredListing: Listing
   owner: string
-  ownerResponse: string
   status: SentEnquiryStatus
   type: string
 }
-
-const initialSentEnquiries: SentEnquiry[] = [
-  {
-    contactEmail: undefined,
-    date: '22 Jun',
-    listing: listings[0],
-    message: 'I would love to discuss a direct exchange for our upcoming trip.',
-    offeredListing: listings[1],
-    owner: 'suebirdnz',
-    ownerResponse: 'No response yet.',
-    status: 'Pending',
-    type: 'Direct Exchange',
-  },
-  {
-    contactEmail: 'john@example.com',
-    date: '18 Apr',
-    listing: listings[2],
-    message: 'Your camper looks like a great fit for our route and travel dates.',
-    offeredListing: listings[0],
-    owner: 'John',
-    ownerResponse: 'Happy to discuss details. Please contact me by email.',
-    status: 'Agreed',
-    type: 'Direct Exchange',
-  },
-  {
-    contactEmail: undefined,
-    date: '09 Mar',
-    listing: listings[3],
-    message: 'We were hoping to arrange a short non-simultaneous swap.',
-    offeredListing: listings[1],
-    owner: 'Mia',
-    ownerResponse: 'Sorry, those dates will not work for us.',
-    status: 'Declined',
-    type: 'Direct Exchange',
-  },
-]
+type ManageReceivedEnquiry = ReceivedEnquiry & {
+  listingId: number
+}
 
 function UserCenterPage() {
   const [activeTab, setActiveTab] = useState<UserCenterTab>('profile')
-  const [sentEnquiryItems, setSentEnquiryItems] = useState(initialSentEnquiries)
-  const [selectedSentEnquiry, setSelectedSentEnquiry] = useState<SentEnquiry | null>(null)
-  const [avatarPreview, setAvatarPreview] = useState('')
+  const [sentEnquiryItems, setSentEnquiryItems] = useState<SentEnquiry[]>([])
+  const [receivedEnquiryItems, setReceivedEnquiryItems] = useState<ManageReceivedEnquiry[]>([])
   const [bio, setBio] = useState('Tell other members about your travel style, exchange preferences, and what makes you a reliable swap partner.')
+  const [profileUserName, setProfileUserName] = useState(() => getSessionUserName())
+  const [profileEmail, setProfileEmail] = useState(() => getSessionUserEmail())
+  const [profileIdentityVerified, setProfileIdentityVerified] = useState(() => isIdentityVerified())
   const [comingSoonTarget, setComingSoonTarget] = useState('')
   const [comingSoonMessage, setComingSoonMessage] = useState('This feature is coming soon.')
   const [showProfileSaved, setShowProfileSaved] = useState(false)
-  const userName = getSessionUserName()
-  const userEmail = getSessionUserEmail()
-  const isVerified = isIdentityVerified()
-  const userListings = listings.slice(0, 2)
+  const [profileLoadMessage, setProfileLoadMessage] = useState('')
+  const [profileSaveMessage, setProfileSaveMessage] = useState('')
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const [enquiryLoadMessage, setEnquiryLoadMessage] = useState('')
+  const [cancellingEnquiryId, setCancellingEnquiryId] = useState<number | null>(null)
+  const [userListings, setUserListings] = useState<Listing[]>([])
+  const [listingLoadMessage, setListingLoadMessage] = useState('')
+  const [listingDeleteMessage, setListingDeleteMessage] = useState('')
+  const [listingToDelete, setListingToDelete] = useState<Listing | null>(null)
+  const [isDeletingListing, setIsDeletingListing] = useState(false)
+  const [showListingDeleted, setShowListingDeleted] = useState(false)
+  const [showListingDeleteBlocked, setShowListingDeleteBlocked] = useState(false)
+  const userId = getSessionUserId()
 
-  const handleAvatarChange = (file: File | undefined) => {
-    if (!file) {
-      return
+  useEffect(() => {
+    let isActive = true
+
+    if (!isAuthenticated() || !userId) {
+      return () => {
+        isActive = false
+      }
     }
 
-    setAvatarPreview(URL.createObjectURL(file))
-  }
+    setProfileLoadMessage('')
+
+    getProfile(userId)
+      .then((profile) => {
+        if (!isActive) {
+          return
+        }
+
+        setProfileUserName(profile.userName)
+        setProfileEmail(profile.email)
+        setProfileIdentityVerified(profile.identityVerified)
+        setBio(profile.bio || '')
+      })
+      .catch((error) => {
+        if (isActive) {
+          setProfileLoadMessage(error instanceof Error ? error.message : 'Unable to load profile.')
+        }
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [userId])
+
+  useEffect(() => {
+    let isActive = true
+
+    if (!isAuthenticated() || !userId) {
+      return () => {
+        isActive = false
+      }
+    }
+
+    setEnquiryLoadMessage('')
+
+    getUserEnquiries(userId)
+      .then((response) => {
+        if (!isActive) {
+          return
+        }
+
+        setSentEnquiryItems(response.sent.map(mapSentEnquiry))
+        setReceivedEnquiryItems(response.received.map(mapReceivedEnquiry))
+      })
+      .catch((error) => {
+        if (isActive) {
+          setEnquiryLoadMessage(error instanceof Error ? error.message : 'Unable to load enquiries.')
+        }
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [userId])
+
+  useEffect(() => {
+    let isActive = true
+
+    if (!isAuthenticated() || !userId) {
+      return () => {
+        isActive = false
+      }
+    }
+
+    setListingLoadMessage('')
+
+    getOwnerListings(userId)
+      .then((ownerListings) => {
+        if (isActive) {
+          setUserListings(ownerListings)
+        }
+      })
+      .catch((error) => {
+        if (isActive) {
+          setListingLoadMessage(error instanceof Error ? error.message : 'Unable to load your listings.')
+        }
+      })
+
+    return () => {
+      isActive = false
+    }
+  }, [userId])
 
   const handleComingSoonClick = (target: string, message: string) => {
     setComingSoonMessage(message)
@@ -88,14 +155,31 @@ function UserCenterPage() {
   }
 
   const handleProfileSave = () => {
-    setShowProfileSaved(true)
-    window.setTimeout(() => setShowProfileSaved(false), 2200)
+    if (!userId) {
+      setProfileSaveMessage('Please sign in before saving your profile.')
+      return
+    }
+
+    setIsSavingProfile(true)
+    setProfileSaveMessage('')
+    setShowProfileSaved(false)
+
+    updateIntroduction(userId, bio)
+      .then((profile) => {
+        setBio(profile.bio || '')
+        setShowProfileSaved(true)
+        window.setTimeout(() => setShowProfileSaved(false), 2200)
+      })
+      .catch((error) => {
+        setProfileSaveMessage(error instanceof Error ? error.message : 'Unable to save introduction.')
+      })
+      .finally(() => setIsSavingProfile(false))
   }
 
   const getStatusDescription = (status: SentEnquiryStatus) => {
     switch (status) {
       case 'Pending':
-        return 'Pending — waiting for owner response'
+        return 'Pending — waiting for owner decision'
       case 'Agreed':
         return 'Agreed — contact details available'
       case 'Declined':
@@ -106,27 +190,59 @@ function UserCenterPage() {
   }
 
   const handleCancelSentEnquiry = (enquiry: SentEnquiry) => {
-    setSentEnquiryItems((currentItems) => currentItems.map((item) => (
-      item.listing.id === enquiry.listing.id && item.date === enquiry.date
-        ? { ...item, ownerResponse: 'You cancelled this request before the owner accepted it.', status: 'Cancelled' }
-        : item
-    )))
+    if (!userId) {
+      setEnquiryLoadMessage('Please sign in before cancelling an enquiry.')
+      return
+    }
+
+    setCancellingEnquiryId(enquiry.id)
+    setEnquiryLoadMessage('')
+
+    cancelEnquiry(enquiry.id, userId)
+      .then(() => {
+        setSentEnquiryItems((currentItems) => currentItems.map((item) => (
+          item.id === enquiry.id
+            ? { ...item, status: 'Cancelled' }
+            : item
+        )))
+      })
+      .catch((error) => {
+        setEnquiryLoadMessage(error instanceof Error ? error.message : 'Unable to cancel enquiry.')
+      })
+      .finally(() => setCancellingEnquiryId(null))
   }
 
-  const getContactDetailsText = (enquiry: SentEnquiry) => {
-    if (enquiry.status === 'Agreed') {
-      return `Email: ${enquiry.contactEmail}`
+  const handleDeleteListing = () => {
+    if (!listingToDelete || !userId) {
+      return
     }
 
-    if (enquiry.status === 'Declined') {
-      return 'Contact details are not available because the owner declined this request.'
-    }
+    setIsDeletingListing(true)
+    setListingDeleteMessage('')
 
-    if (enquiry.status === 'Cancelled') {
-      return 'Contact details are not available because you cancelled this request.'
-    }
+    deleteListing(listingToDelete.listingId, userId)
+      .then((response) => {
+        setUserListings((currentListings) => currentListings.filter((listing) => listing.listingId !== response.listingId))
+        setShowListingDeleted(true)
+        window.setTimeout(() => setShowListingDeleted(false), 3000)
+        setListingToDelete(null)
+      })
+      .catch((error) => {
+        const errorMessage = error instanceof Error ? error.message : 'Unable to delete listing.'
+        if (errorMessage.includes('active exchange enquiries')) {
+          setListingToDelete(null)
+          setShowListingDeleteBlocked(true)
+          window.setTimeout(() => setShowListingDeleteBlocked(false), 3000)
+          return
+        }
 
-    return 'Available after the owner agrees.'
+        setListingDeleteMessage(errorMessage)
+      })
+      .finally(() => setIsDeletingListing(false))
+  }
+
+  const getReceivedEnquiryCount = (listingId: number) => {
+    return receivedEnquiryItems.filter((enquiry) => enquiry.listingId === listingId).length
   }
 
   if (!isAuthenticated()) {
@@ -222,41 +338,53 @@ function UserCenterPage() {
                   <div className="grid gap-8 xl:grid-cols-[220px_1fr]">
                     <div>
                       <div className="mb-4 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full bg-blue-50 text-4xl font-extrabold text-blue-500">
-                        {avatarPreview ? (
-                          <img alt="" className="h-full w-full object-cover" src={avatarPreview} />
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-16">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                          </svg>
-                        )}
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-16">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        </svg>
                       </div>
-                      <label className="inline-flex h-11 cursor-pointer items-center justify-center rounded-4xl border border-blue-200 bg-white px-5 text-sm font-semibold text-gray-600 transition hover:bg-blue-100">
-                        Change avatar
-                        <input
-                          accept="image/*"
-                          className="sr-only"
-                          onChange={(event) => handleAvatarChange(event.target.files?.[0])}
-                          type="file"
-                        />
-                      </label>
+                      <div className="relative inline-flex">
+                        <button
+                          aria-describedby={comingSoonTarget === 'avatar' ? 'avatar-hint' : undefined}
+                          aria-disabled="true"
+                          className="inline-flex h-11 cursor-not-allowed items-center justify-center rounded-4xl border border-gray-200 bg-gray-50 px-5 text-sm font-semibold text-gray-400 shadow-none transition hover:border-gray-200 hover:bg-gray-50"
+                          onClick={() => handleComingSoonClick('avatar', 'Change avatar will be supported soon.')}
+                          type="button"
+                        >
+                          Change avatar
+                        </button>
+                        {comingSoonTarget === 'avatar' ? (
+                          <div
+                            className="absolute left-0 bottom-[calc(100%+10px)] z-10 w-[230px] rounded-2xl bg-gray-800 px-4 py-3 text-xs leading-5 font-bold text-white shadow-lg shadow-gray-900/20"
+                            id="avatar-hint"
+                            role="status"
+                          >
+                            {comingSoonMessage}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
 
                     <div className="grid gap-5">
                       <div className="grid gap-4 md:grid-cols-2">
                         <label className="grid gap-2 text-sm font-extrabold text-gray-700">
                           User name
-                          <input className="h-12 rounded-3xl border border-blue-100 bg-gray-50 px-4 text-sm font-bold text-gray-500" readOnly value={userName} />
+                          <input className="h-12 rounded-3xl border border-blue-100 bg-gray-50 px-4 text-sm font-bold text-gray-500" readOnly value={profileUserName} />
                         </label>
                         <label className="grid gap-2 text-sm font-extrabold text-gray-700">
                           Bound email
-                          <input className="h-12 rounded-3xl border border-blue-100 bg-gray-50 px-4 text-sm font-bold text-gray-500" readOnly value={userEmail} />
+                          <input className="h-12 rounded-3xl border border-blue-100 bg-gray-50 px-4 text-sm font-bold text-gray-500" readOnly value={profileEmail} />
                         </label>
                       </div>
+                      {profileLoadMessage ? (
+                        <p className="m-0 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+                          {profileLoadMessage}
+                        </p>
+                      ) : null}
                       <div className="rounded-3xl border border-blue-100 bg-blue-50/50 px-5 py-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
                             <p className="m-0 text-sm font-extrabold text-gray-800">Identity verification</p>
-                            {isVerified ? (
+                            {profileIdentityVerified ? (
                               <p className="mt-2 mb-0 flex items-center gap-2 text-sm font-bold text-blue-600">
                                 <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-blue-500 text-white" aria-hidden="true">
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-3.5 w-3.5">
@@ -269,7 +397,7 @@ function UserCenterPage() {
                               <p className="mt-2 mb-0 text-sm text-gray-500">Not verified</p>
                             )}
                           </div>
-                          {!isVerified ? (
+                          {!profileIdentityVerified ? (
                             <a
                               className="inline-flex h-11 items-center justify-center rounded-4xl border border-blue-100 bg-white px-5 text-sm font-extrabold text-blue-600 no-underline transition hover:bg-blue-50"
                               href="/identity-verification"
@@ -292,14 +420,20 @@ function UserCenterPage() {
                           Save your avatar and introduction changes before leaving this page.
                         </p>
                         <button
-                          className="font-outfit h-12 cursor-pointer rounded-4xl border-0 bg-blue-500 px-8 text-sm font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600"
+                          className="font-outfit h-12 cursor-pointer rounded-4xl border-0 bg-blue-500 px-8 text-sm font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+                          disabled={isSavingProfile}
                           onClick={handleProfileSave}
                           type="button"
                         >
-                          Save
+                          {isSavingProfile ? 'Saving...' : 'Save'}
                         </button>
        
                       </div>
+                      {profileSaveMessage ? (
+                        <p className="m-0 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+                          {profileSaveMessage}
+                        </p>
+                      ) : null}
                       {showProfileSaved ? (
                         <p className="m-0 rounded-3xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-600">
                           Profile changes saved.
@@ -317,26 +451,20 @@ function UserCenterPage() {
                       <h2 className="font-outfit m-0 text-3xl font-extrabold text-gray-800">Manage Listings</h2>
                       <p className="mt-2 mb-0 text-sm text-gray-400">Published listings connected to your account.</p>
                     </div>
-                    <div className="relative">
-                      <button
-                        aria-describedby={comingSoonTarget === 'add-listing' ? 'add-listing-hint' : undefined}
-                        className="h-12 cursor-not-allowed rounded-4xl border border-gray-100 bg-gray-50 px-6 text-sm font-extrabold text-gray-300"
-                        onClick={() => handleComingSoonClick('add-listing', 'Add listing is coming soon.')}
-                        type="button"
+                    <div>
+                      <a
+                        className="inline-flex h-12 items-center rounded-4xl border-0 bg-blue-500 px-6 text-sm font-extrabold text-white no-underline shadow-lg shadow-blue-200 transition hover:bg-blue-600"
+                        href="/user-center/listings/new"
                       >
                         Add New Listing
-                      </button>
-                      {comingSoonTarget === 'add-listing' ? (
-                        <div
-                          className="absolute right-0 bottom-[calc(100%+10px)] z-10 w-[220px] rounded-2xl bg-gray-800 px-4 py-3 text-xs leading-5 font-bold text-white shadow-lg shadow-gray-900/20"
-                          id="add-listing-hint"
-                          role="status"
-                        >
-                          {comingSoonMessage}
-                        </div>
-                      ) : null}
+                      </a>
                     </div>
                   </div>
+                  {listingLoadMessage ? (
+                    <p className="m-0 mb-4 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+                      {listingLoadMessage}
+                    </p>
+                  ) : null}
 
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[760px] border-separate border-spacing-y-3 text-left text-sm">
@@ -353,7 +481,7 @@ function UserCenterPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {userListings.map((listing, index) => (
+                        {userListings.map((listing) => (
                           <tr className="bg-blue-50/50 text-gray-600" key={listing.id}>
                             <td className="rounded-l-3xl px-4 py-4">
                               <a className="font-extrabold text-blue-500 no-underline hover:text-blue-600" href={`/listings/${listing.id}`}>
@@ -365,51 +493,40 @@ function UserCenterPage() {
                             <td className="px-4 py-4">{listing.exchangeTypes.join(', ')}</td>
                             <td className="px-4 py-4">{listing.createdAt}</td>
                             <td className="px-4 py-4">Active</td>
-                            <td className="px-4 py-4">{index + 1}</td>
+                            <td className="px-4 py-4">{getReceivedEnquiryCount(listing.listingId)}</td>
                             <td className="rounded-r-3xl px-4 py-4">
                               <div className="relative flex gap-3">
-                                <div className="relative">
-                                  <button
-                                    aria-describedby={comingSoonTarget === `edit-${listing.id}` ? `edit-${listing.id}-hint` : undefined}
-                                    className="cursor-not-allowed border-0 bg-transparent p-0 text-sm  text-gray-300"
-                                    onClick={() => handleComingSoonClick(`edit-${listing.id}`, 'Edit listing is coming soon.')}
-                                    type="button"
+                                <div>
+                                  <a
+                                    className="text-sm font-bold text-blue-500 no-underline hover:text-blue-600"
+                                    href={`/user-center/listings/${listing.id}/edit`}
                                   >
                                     Edit
-                                  </button>
-                                  {comingSoonTarget === `edit-${listing.id}` ? (
-                                    <div
-                                      className="absolute right-0 bottom-[calc(100%+10px)] z-10 w-[220px] rounded-2xl bg-gray-800 px-4 py-3 text-xs leading-5 font-bold text-white shadow-lg shadow-gray-900/20"
-                                      id={`edit-${listing.id}-hint`}
-                                      role="status"
-                                    >
-                                      {comingSoonMessage}
-                                    </div>
-                                  ) : null}
+                                  </a>
                                 </div>
-                                <div className="relative">
+                                <div>
                                   <button
-                                    aria-describedby={comingSoonTarget === `delete-${listing.id}` ? `delete-${listing.id}-hint` : undefined}
-                                    className="cursor-not-allowed border-0 bg-transparent p-0 text-sm  text-gray-300"
-                                    onClick={() => handleComingSoonClick(`delete-${listing.id}`, 'Delete listing is coming soon.')}
+                                    className="cursor-pointer border-0 bg-transparent p-0 text-sm font-bold text-red-400 hover:text-red-500"
+                                    onClick={() => {
+                                      setListingDeleteMessage('')
+                                      setListingToDelete(listing)
+                                    }}
                                     type="button"
                                   >
                                     Delete
                                   </button>
-                                  {comingSoonTarget === `delete-${listing.id}` ? (
-                                    <div
-                                      className="absolute right-0 bottom-[calc(100%+10px)] z-10 w-[220px] rounded-2xl bg-gray-800 px-4 py-3 text-xs leading-5 font-bold text-white shadow-lg shadow-gray-900/20"
-                                      id={`delete-${listing.id}-hint`}
-                                      role="status"
-                                    >
-                                      {comingSoonMessage}
-                                    </div>
-                                  ) : null}
                                 </div>
                               </div>
                             </td>
                           </tr>
                         ))}
+                        {userListings.length === 0 ? (
+                          <tr>
+                            <td className="rounded-3xl bg-blue-50/50 px-4 py-5 text-sm text-gray-400" colSpan={8}>
+                              No listings connected to your account yet.
+                            </td>
+                          </tr>
+                        ) : null}
                       </tbody>
                     </table>
                   </div>
@@ -424,6 +541,11 @@ function UserCenterPage() {
                   <p className="mt-0 mb-6 text-sm text-gray-400">
                     Track your outgoing swap requests and follow up when an owner responds.
                   </p>
+                  {enquiryLoadMessage ? (
+                    <p className="m-0 mb-4 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+                      {enquiryLoadMessage}
+                    </p>
+                  ) : null}
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[920px] border-separate border-spacing-y-3 text-left text-sm">
                       <thead>
@@ -438,9 +560,9 @@ function UserCenterPage() {
                       </thead>
                       <tbody>
                         {sentEnquiryItems.map((enquiry) => (
-                          <tr className="bg-blue-50/50 text-gray-600" key={`${enquiry.listing.id}-${enquiry.date}`}>
+                          <tr className="bg-blue-50/50 text-gray-600" key={enquiry.id}>
                             <td className="rounded-l-3xl px-4 py-4">
-                              <a className="font-extrabold text-blue-500 no-underline hover:text-blue-600" href={`/listings/${enquiry.listing.id}`}>
+                              <a className=" text-blue-500 no-underline hover:text-blue-600" href={`/listings/${enquiry.listing.id}`}>
                                 {enquiry.listing.title}
                               </a>
                             </td>
@@ -455,26 +577,35 @@ function UserCenterPage() {
                             </td>
                             <td className="rounded-r-3xl px-4 py-4">
                               <div className="flex flex-wrap gap-2">
-                                <button
-                                  className="h-9 cursor-pointer rounded-4xl border border-blue-100 bg-white px-4 text-xs font-extrabold text-blue-600 transition hover:bg-blue-50"
-                                  onClick={() => setSelectedSentEnquiry(enquiry)}
-                                  type="button"
+                                <a
+                                  className="inline-flex h-9 items-center justify-center rounded-4xl border border-blue-100 bg-white px-4 text-xs  text-blue-600 no-underline transition hover:bg-blue-50"
+                                  href={`/user-center/enquiries/sent/${enquiry.id}`}
+                                  rel="noreferrer"
+                                  target="_blank"
                                 >
                                   View details
-                                </button>
+                                </a>
                                 {enquiry.status === 'Pending' ? (
                                   <button
                                     className="h-9 cursor-pointer rounded-4xl border border-red-100 bg-red-50 px-4 text-xs font-extrabold text-red-500 transition hover:bg-red-100"
+                                    disabled={cancellingEnquiryId === enquiry.id}
                                     onClick={() => handleCancelSentEnquiry(enquiry)}
                                     type="button"
                                   >
-                                    Cancel request
+                                    {cancellingEnquiryId === enquiry.id ? 'Cancelling...' : 'Cancel request'}
                                   </button>
                                 ) : null}
                               </div>
                             </td>
                           </tr>
                         ))}
+                        {sentEnquiryItems.length === 0 ? (
+                          <tr>
+                            <td className="rounded-3xl bg-blue-50/50 px-4 py-5 text-sm text-gray-400" colSpan={6}>
+                              No sent enquiries yet.
+                            </td>
+                          </tr>
+                        ) : null}
                       </tbody>
                     </table>
                   </div>
@@ -492,6 +623,11 @@ function UserCenterPage() {
                   <p className="mt-0 mb-6 text-sm text-gray-400">
                     * Once you accept an enquiry and agree to discuss, your email address will be shared with the enquirer so they can contact you directly for more details.
                   </p>
+                  {enquiryLoadMessage ? (
+                    <p className="m-0 mb-4 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+                      {enquiryLoadMessage}
+                    </p>
+                  ) : null}
 
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[920px] border-separate border-spacing-y-3 text-left text-sm">
@@ -506,7 +642,7 @@ function UserCenterPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {receivedEnquiries.map((enquiry) => (
+                        {receivedEnquiryItems.map((enquiry) => (
                           <tr className="bg-blue-50/50 text-gray-600" key={enquiry.id}>
                             <td className="rounded-l-3xl px-4 py-4">
                               <a className="font-extrabold text-blue-500 no-underline hover:text-blue-600" href={`/listings/${enquiry.yourListing.id}`}>
@@ -534,6 +670,13 @@ function UserCenterPage() {
                             </td>
                           </tr>
                         ))}
+                        {receivedEnquiryItems.length === 0 ? (
+                          <tr>
+                            <td className="rounded-3xl bg-blue-50/50 px-4 py-5 text-sm text-gray-400" colSpan={6}>
+                              No received enquiries yet.
+                            </td>
+                          </tr>
+                        ) : null}
                       </tbody>
                     </table>
                   </div>
@@ -544,125 +687,153 @@ function UserCenterPage() {
         </div>
       </section>
 
-      {selectedSentEnquiry ? (
+      {listingToDelete ? (
         <div
-          aria-labelledby="sent-enquiry-detail-title"
+          aria-labelledby="delete-listing-title"
           aria-modal="true"
-          className="fixed inset-0 z-40 flex items-center justify-center bg-gray-900/40 px-6 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-6 backdrop-blur-sm"
           role="dialog"
         >
-          <div className="max-h-[88vh] w-full max-w-[980px] overflow-y-auto rounded-4xl bg-white p-7 shadow-2xl shadow-gray-900/20 md:p-8">
-            <div className="mb-6 flex items-start justify-between gap-6">
-              <div>
-                <p className="mb-2 text-xs font-extrabold tracking-[0.16em] text-blue-500 uppercase">
-                  Enquiry details
-                </p>
-                <h2 id="sent-enquiry-detail-title" className="font-outfit m-0 text-2xl font-extrabold text-gray-800">
-                  {selectedSentEnquiry.listing.title}
-                </h2>
-              </div>
+          <div className="w-full max-w-[520px] rounded-4xl bg-white p-8 shadow-2xl shadow-gray-900/20">
+            <h2 id="delete-listing-title" className="font-outfit m-0 text-2xl font-extrabold text-gray-800">
+              Delete listing?
+            </h2>
+            <p className="mt-4 mb-0 text-sm leading-6 text-gray-500">
+              This will permanently delete "{listingToDelete.title}". Any enquiries connected to this listing,
+              including received enquiries and enquiries where it was offered, will be deleted at the same time.
+            </p>
+            {listingDeleteMessage ? (
+              <p className="mt-4 mb-0 rounded-3xl bg-red-50 px-4 py-3 text-sm font-bold text-red-500">
+                {listingDeleteMessage}
+              </p>
+            ) : null}
+            <div className="mt-7 flex justify-end gap-3">
               <button
-                aria-label="Close enquiry details"
-                className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-xl font-bold text-gray-700"
-                onClick={() => setSelectedSentEnquiry(null)}
+                className="h-11 cursor-pointer rounded-4xl border border-blue-100 bg-white px-6 text-sm font-extrabold text-gray-500 shadow-md shadow-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-300"
+                disabled={isDeletingListing}
+                onClick={() => {
+                  setListingDeleteMessage('')
+                  setListingToDelete(null)
+                }}
                 type="button"
               >
-                x
+                Cancel
+              </button>
+              <button
+                className="h-11 cursor-pointer rounded-4xl border-0 bg-red-500 px-6 text-sm font-extrabold text-white shadow-lg shadow-red-100 transition hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
+                disabled={isDeletingListing}
+                onClick={handleDeleteListing}
+                type="button"
+              >
+                {isDeletingListing ? 'Deleting...' : 'Confirm delete'}
               </button>
             </div>
-
-            <div className="grid gap-4">
-              <div className="grid gap-4 lg:grid-cols-2">
-                <section className="rounded-3xl border border-blue-100 px-4 py-4">
-                  <h3 className="font-outfit m-0 mb-3 text-base font-extrabold text-gray-800">Owner and listing</h3>
-                  <dl className="m-0 grid gap-3">
-                    <div className="grid gap-1 sm:grid-cols-[120px_1fr]">
-                      <dt className="text-sm font-extrabold text-gray-700">Listing title</dt>
-                      <dd className="m-0 text-sm">
-                        <a className="font-extrabold text-blue-500 no-underline hover:text-blue-600" href={`/listings/${selectedSentEnquiry.listing.id}`}>
-                          {selectedSentEnquiry.listing.title}
-                        </a>
-                      </dd>
-                    </div>
-                    <div className="grid gap-1 sm:grid-cols-[120px_1fr]">
-                      <dt className="text-sm font-extrabold text-gray-700">Owner</dt>
-                      <dd className="m-0 text-sm text-gray-600">{selectedSentEnquiry.owner}</dd>
-                    </div>
-                  </dl>
-
-                  <div className="mt-5 rounded-3xl bg-gray-50 px-4 py-4">
-                    <h4 className="font-outfit m-0 mb-3 text-sm font-extrabold text-gray-800">Owner looking for</h4>
-                    <div className="grid gap-4">
-                      <div>
-                        <p className="m-0 mb-2 text-xs font-extrabold tracking-[0.1em] text-gray-400 uppercase">
-                          Wanted destinations
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedSentEnquiry.listing.wantedDestinations.map((destination) => (
-                            <span className="rounded-4xl border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-600" key={destination}>
-                              {destination}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="m-0 mb-2 text-xs font-extrabold tracking-[0.1em] text-gray-400 uppercase">
-                          Wanted assets
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedSentEnquiry.listing.wantedAssets.map((asset) => (
-                            <span className="rounded-4xl border border-gray-200 bg-white px-3 py-1.5 text-xs text-gray-600" key={asset}>
-                              {asset}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                <section className="rounded-3xl border border-blue-100 px-4 py-4">
-                  <h3 className="font-outfit m-0 mb-3 text-base font-extrabold text-gray-800">Your side</h3>
-                  <div className="grid gap-4">
-                    <div className="grid gap-1 sm:grid-cols-[120px_1fr]">
-                      <span className="text-sm font-extrabold text-gray-700">Your offer</span>
-                      <a className="text-sm font-extrabold text-blue-500 no-underline hover:text-blue-600" href={`/listings/${selectedSentEnquiry.offeredListing.id}`}>
-                        {selectedSentEnquiry.offeredListing.title}
-                      </a>
-                    </div>
-                    <div>
-                      <h4 className="font-outfit m-0 mb-2 text-sm font-extrabold text-gray-800">Your message</h4>
-                      <p className="m-0 text-sm leading-6 text-gray-500">{selectedSentEnquiry.message}</p>
-                    </div>
-                  </div>
-                </section>
-              </div>
-
-              <section className="rounded-3xl bg-blue-50 px-4 py-4">
-                <h3 className="font-outfit m-0 mb-3 text-base font-extrabold text-gray-800">Request status</h3>
-                <div className="grid gap-4 lg:grid-cols-3">
-                  <div>
-                    <p className="m-0 mb-1 text-xs font-extrabold tracking-[0.1em] text-gray-400 uppercase">Status</p>
-                    <p className="m-0 text-sm leading-6 text-gray-600">{getStatusDescription(selectedSentEnquiry.status)}</p>
-                  </div>
-                  <div>
-                    <p className="m-0 mb-1 text-xs font-extrabold tracking-[0.1em] text-gray-400 uppercase">Owner response</p>
-                    <p className="m-0 text-sm leading-6 text-gray-600">{selectedSentEnquiry.ownerResponse}</p>
-                  </div>
-                  <div>
-                    <p className="m-0 mb-1 text-xs font-extrabold tracking-[0.1em] text-gray-400 uppercase">Contact details</p>
-                    <p className="m-0 text-sm leading-6 text-gray-600">
-                      {getContactDetailsText(selectedSentEnquiry)}
-                    </p>
-                  </div>
-                </div>
-              </section>
+          </div>
+        </div>
+      ) : null}
+      {showListingDeleted ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/15 px-6 backdrop-blur-sm">
+          <div className="pointer-events-auto flex items-center justify-between gap-3 rounded-3xl border border-gray-100 bg-white px-6 py-4 text-center shadow-2xl shadow-gray-900/20">
+            <p className="m-0 text-sm font-extrabold text-gray-900">Listing deleted successfully</p>
+          </div>
+        </div>
+      ) : null}
+      {showListingDeleteBlocked ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/15 px-6 backdrop-blur-sm">
+          <div className="pointer-events-auto relative flex max-w-[620px] items-start gap-4 rounded-3xl border border-gray-100 bg-white px-7 py-6 pr-14 text-left shadow-2xl shadow-gray-900/20">
+            <button
+              aria-label="Close delete warning"
+              className="absolute top-4 right-4 cursor-pointer border-0 bg-transparent p-1 text-xl leading-none font-extrabold text-gray-300 transition hover:text-gray-500"
+              onClick={() => setShowListingDeleteBlocked(false)}
+              type="button"
+            >
+              x
+            </button>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="mt-0.5 h-7 w-7 shrink-0 text-red-500">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12V16.5Zm9-4.5a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            <div>
+              <h2 className="m-0 text-lg leading-7 font-extrabold text-gray-900">Unable to Delete Listing</h2>
+              <p className="mt-2 mb-0 text-sm leading-6 font-bold text-gray-700">
+                This listing is linked to active exchange enquiries. Please complete, decline, or cancel the related enquiries before deleting it.
+              </p>
             </div>
           </div>
         </div>
       ) : null}
     </main>
   )
+}
+
+function formatDate(value?: string) {
+  if (!value) {
+    return 'Not recorded'
+  }
+
+  const date = new Date(`${value}T00:00:00`)
+  if (Number.isNaN(date.getTime())) {
+    return value
+  }
+
+  return date.toLocaleDateString('en-NZ', {
+    day: '2-digit',
+    month: 'short',
+  })
+}
+
+function toSentStatus(status: string): SentEnquiryStatus {
+  if (status === 'Agreed' || status === 'Declined' || status === 'Cancelled') {
+    return status
+  }
+
+  return 'Pending'
+}
+
+function toReceivedStatus(status: string): ReceivedEnquiryStatus {
+  if (status === 'Agreed' || status === 'Declined') {
+    return status
+  }
+
+  return 'Pending'
+}
+
+function mapSentEnquiry(enquiry: UserEnquiryItemResponse): SentEnquiry {
+  return {
+    contactEmail: enquiry.counterpartyEmail,
+    date: formatDate(enquiry.dateSent),
+    id: enquiry.id,
+    listing: listingFromEnquirySummary(enquiry.listing, enquiry.listingId),
+    message: enquiry.message,
+    offeredListing: listingFromEnquirySummary(
+      enquiry.offeredListing,
+      enquiry.offeredListingId,
+      'No listing offered',
+      'You did not attach one of your listings to this enquiry.',
+    ),
+    owner: enquiry.counterpartyName,
+    status: toSentStatus(enquiry.status),
+    type: enquiry.enquiryType,
+  }
+}
+
+function mapReceivedEnquiry(enquiry: UserEnquiryItemResponse): ManageReceivedEnquiry {
+  return {
+    dateReceived: formatDate(enquiry.dateReceived || enquiry.dateSent),
+    id: enquiry.id,
+    listingId: enquiry.listingId,
+    message: enquiry.message,
+    senderEmail: enquiry.counterpartyEmail || '',
+    senderListing: listingFromEnquirySummary(
+      enquiry.offeredListing,
+      enquiry.offeredListingId,
+      'No listing offered',
+      'The sender did not attach one of their listings to this enquiry.',
+    ),
+    senderName: enquiry.counterpartyName,
+    status: toReceivedStatus(enquiry.status),
+    type: enquiry.enquiryType,
+    yourListing: listingFromEnquirySummary(enquiry.listing, enquiry.listingId),
+  }
 }
 
 export default UserCenterPage

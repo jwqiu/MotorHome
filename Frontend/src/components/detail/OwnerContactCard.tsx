@@ -7,15 +7,32 @@ type OwnerContactCardProps = {
     memberSince: string
     spokenLanguages: string
   }
+  isEnquiryPending: boolean
+  isEnquiryStatusLoading: boolean
+  isOwnListing: boolean
   onOpenEnquiry: () => void
 }
 
 function OwnerContactCard({
   listingTitle,
+  isEnquiryPending,
+  isEnquiryStatusLoading,
+  isOwnListing,
   owner,
   onOpenEnquiry,
 }: OwnerContactCardProps) {
   const initials = owner.displayName.slice(0, 2).toUpperCase()
+  const isRequestDisabled = isOwnListing || isEnquiryPending || isEnquiryStatusLoading
+  const ownerAbout = owner.about.trim() || "No introduction yet."
+  const memberSince = owner.memberSince.trim() || 'Not available'
+  const spokenLanguages = owner.spokenLanguages.trim() || 'Not specified'
+  const requestButtonLabel = isEnquiryStatusLoading
+    ? 'Checking...'
+    : isOwnListing
+      ? 'Your Listing'
+      : isEnquiryPending
+        ? 'Awaiting Response'
+        : 'Request a swap'
 
   return (
     <aside className="self-start rounded-4xl bg-white p-7 shadow-lg shadow-blue-100 md:p-8 xl:sticky xl:top-32">
@@ -36,39 +53,39 @@ function OwnerContactCard({
         </div>
       </div> */}
 
-      <div className="mt-6  border-blue-50 pt-6">
-        <p className="m-0 text-sm leading-6 text-gray-500">{owner.about}</p>
-        <dl className="mt-5 grid gap-3 text-sm">
+      <div className="  border-blue-50 pt-6">
+        <p className="m-0 mt-3 text-sm text-center leading-6 text-gray-400">{ownerAbout}</p>
+        <dl className="mt-8 grid gap-3 text-sm">
           <div>
             <dt className="font-extrabold text-gray-800">Member since</dt>
-            <dd className="m-0 text-gray-500">{owner.memberSince}</dd>
+            <dd className="m-0 text-gray-500">{memberSince}</dd>
           </div>
           <div>
             <dt className="font-extrabold text-gray-800">Spoken language(s)</dt>
-            <dd className="m-0 text-gray-500">{owner.spokenLanguages}</dd>
+            <dd className="m-0 text-gray-500">{spokenLanguages}</dd>
           </div>
         </dl>
       </div>
 
       <div className="mt-7 grid gap-3">
-        {/* <button
-          className="font-outfit h-13 cursor-pointer rounded-4xl border-0 bg-blue-500 text-base font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600"
-          onClick={onOpenEnquiry}
-          type="button"
-        >
-          Send a message
-        </button> */}
         <button
-          className="font-outfit h-13 cursor-pointer rounded-4xl border border-blue-100 bg-blue-500 text-base font-extrabold text-white transition hover:border-blue-200 hover:bg-blue-100"
+          className={`font-outfit h-13 rounded-4xl border text-base font-extrabold transition ${
+            isRequestDisabled
+              ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 shadow-none'
+              : 'cursor-pointer border-blue-100 bg-blue-500 text-white shadow-lg shadow-blue-200 hover:border-blue-200 hover:bg-blue-600'
+          }`}
+          disabled={isRequestDisabled}
           onClick={onOpenEnquiry}
           type="button"
         >
-          Request a swap
+          {requestButtonLabel}
         </button>
       </div>
 
       <p className="mt-5 mb-0 text-center text-xs leading-5 text-gray-400">
-        Ask about availability, timing, and swap details for {listingTitle}.
+        {isOwnListing
+          ? "This is your listing. You can't request an exchange with yourself."
+          : `Ask about availability, timing, and swap details for ${listingTitle}.`}
       </p>
     </aside>
   )

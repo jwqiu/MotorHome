@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 
+type ModernSelectOption = string | {
+  label: string
+  value: string
+}
+
 type ModernSelectProps = {
-  options: string[]
+  options: ModernSelectOption[]
   ariaLabel: string
   className?: string
   disabled?: boolean
@@ -21,7 +26,8 @@ function ModernSelect({
 }: ModernSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
-  const selectedLabel = value || placeholder || ''
+  const selectedOption = options.find((option) => getOptionValue(option) === value)
+  const selectedLabel = selectedOption ? getOptionLabel(selectedOption) : placeholder || ''
 
   useEffect(() => {
     if (!isOpen) {
@@ -49,8 +55,8 @@ function ModernSelect({
     }
   }, [isOpen])
 
-  const handleOptionClick = (option: string) => {
-    onChange?.(option)
+  const handleOptionClick = (option: ModernSelectOption) => {
+    onChange?.(getOptionValue(option))
     setIsOpen(false)
   }
 
@@ -82,7 +88,9 @@ function ModernSelect({
           role="listbox"
         >
           {options.map((option) => {
-            const isSelected = option === value
+            const optionValue = getOptionValue(option)
+            const optionLabel = getOptionLabel(option)
+            const isSelected = optionValue === value
 
             return (
               <button
@@ -92,12 +100,12 @@ function ModernSelect({
                     ? 'bg-blue-50 text-blue-600'
                     : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-500'
                 }`}
-                key={option}
+                key={optionValue}
                 onClick={() => handleOptionClick(option)}
                 role="option"
                 type="button"
               >
-                <span className="min-w-0 truncate">{option}</span>
+                <span className="min-w-0 truncate">{optionLabel}</span>
               </button>
             )
           })}
@@ -105,6 +113,14 @@ function ModernSelect({
       ) : null}
     </div>
   )
+}
+
+function getOptionLabel(option: ModernSelectOption) {
+  return typeof option === 'string' ? option : option.label
+}
+
+function getOptionValue(option: ModernSelectOption) {
+  return typeof option === 'string' ? option : option.value
 }
 
 export default ModernSelect

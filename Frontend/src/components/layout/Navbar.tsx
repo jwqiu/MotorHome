@@ -100,7 +100,7 @@ function Navbar({ activePage, variant = 'overlay' }: NavbarProps) {
               }`}
               href="/sign-in"
             >
-              Sign in
+              Login
             </a>
             <a
               className="inline-flex min-h-[40px] min-w-[96px] items-center justify-center rounded-4xl bg-blue-500 px-5 text-sm font-extrabold text-white no-underline transition-transform duration-200 hover:scale-110 hover:bg-blue-600 md:min-h-[42px] md:min-w-[150px] md:px-8"

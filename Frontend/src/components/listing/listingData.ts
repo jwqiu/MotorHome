@@ -9,6 +9,21 @@ import listing08 from '../../assets/listings/listing-08.jpg'
 import listing09 from '../../assets/listings/listing-09.jpg'
 import listing10 from '../../assets/listings/listing-10.jpg'
 
+const listingImages = [
+  listing01,
+  listing02,
+  listing03,
+  listing04,
+  listing05,
+  listing06,
+  listing07,
+  listing08,
+  listing09,
+  listing10,
+]
+
+const listingPlaceholderImage = getListingPlaceholderImage()
+
 export type Listing = {
   availableFrom: string
   availableTo: string
@@ -19,6 +34,7 @@ export type Listing = {
   exchangeMethod: 'Direct Exchange' | 'Point Exchange'
   exchangeTimings: string[]
   id: string
+  listingId: number
   title: string
   imageLabel: string
   imageSrc: string
@@ -28,6 +44,24 @@ export type Listing = {
   wantedDestinations: string[]
   exchangeTypes: string[]
   description: string
+}
+
+export function getListingPlaceholderImage() {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="750" viewBox="0 0 1200 750">
+      <rect width="1200" height="750" fill="#ffffff"/>
+      <circle cx="600" cy="285" r="112" fill="#dbeafe"/>
+      <path d="M430 420h160L510 300 430 420Z" fill="#93c5fd"/>
+      <path d="M520 420h250L645 275 520 420Z" fill="#93c5fd"/>
+      <text x="600" y="515" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="#64748b">Placeholder photo</text>
+    </svg>
+  `.trim()
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+}
+
+export function getListingImageByListingId(listingId: number) {
+  return listingImages[listingId - 1] ?? listingPlaceholderImage
 }
 
 export type ListingFiltersValue = {
@@ -83,6 +117,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Simultaneous', 'Non-simultaneous'],
     id: 'modern-family-motorhome',
+    listingId: 1,
     title: 'Modern Family Motorhome',
     imageLabel: 'Modern motorhome',
     imageSrc: listing01,
@@ -103,6 +138,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Simultaneous', 'Non-simultaneous'],
     id: 'two-year-old-family-motorhome',
+    listingId: 2,
     title: '2-Year-Old Family Motorhome',
     imageLabel: 'Family motorhome',
     imageSrc: listing02,
@@ -123,6 +159,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Non-simultaneous'],
     id: 'near-new-luxury-camper',
+    listingId: 3,
     title: 'Near - New Luxury Camper',
     imageLabel: 'Luxury camper',
     imageSrc: listing03,
@@ -143,6 +180,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Simultaneous'],
     id: 'classic-coastal-campervan',
+    listingId: 4,
     title: 'Classic Coastal Campervan',
     imageLabel: 'Classic campervan',
     imageSrc: listing04,
@@ -163,6 +201,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Non-simultaneous'],
     id: 'compact-weekender-caravan',
+    listingId: 5,
     title: 'Compact Weekender Motorhome',
     imageLabel: 'Compact motorhome',
     imageSrc: listing05,
@@ -183,6 +222,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Simultaneous'],
     id: 'heritage-travel-trailer',
+    listingId: 6,
     title: 'Heritage Touring Motorhome',
     imageLabel: 'Heritage motorhome',
     imageSrc: listing06,
@@ -203,6 +243,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Simultaneous', 'Non-simultaneous'],
     id: 'bright-ducato-camper',
+    listingId: 7,
     title: 'Bright Ducato Camper',
     imageLabel: 'Bright Ducato camper',
     imageSrc: listing07,
@@ -223,6 +264,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Non-simultaneous'],
     id: 'autosleeper-clubman-escape',
+    listingId: 8,
     title: 'Autosleeper Clubman Escape',
     imageLabel: 'Autosleeper campervan',
     imageSrc: listing08,
@@ -243,6 +285,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Simultaneous'],
     id: 'off-road-sprinter-adventure',
+    listingId: 9,
     title: 'Off-Road Sprinter Adventure',
     imageLabel: 'Off-road sprinter campervan',
     imageSrc: listing09,
@@ -263,6 +306,7 @@ export const listings: Listing[] = [
     exchangeMethod: 'Direct Exchange',
     exchangeTimings: ['Simultaneous', 'Non-simultaneous'],
     id: 'citroen-h-van-retreat',
+    listingId: 10,
     title: 'Citroen H Van Retreat',
     imageLabel: 'Citroen H van camper',
     imageSrc: listing10,

@@ -1,6 +1,121 @@
 @MotorHome.Api_HostAddress = http://localhost:0
 
-GET {{MotorHome.Api_HostAddress}}/weatherforecast/
+GET {{MotorHome.Api_HostAddress}}/api/connection
 Accept: application/json
 
 ###
+
+GET {{MotorHome.Api_HostAddress}}/api/listing/modern-family-motorhome
+Accept: application/json
+
+###
+
+GET {{MotorHome.Api_HostAddress}}/api/listing?country=New%20Zealand&city=Auckland&exchangeMethod=Direct%20Exchange&exchangeTimings=Simultaneous&availableFrom=2026-01-01&availableTo=2027-12-31
+Accept: application/json
+
+###
+
+GET {{MotorHome.Api_HostAddress}}/api/listing/owner/11111111-1111-1111-1111-111111111111
+Accept: application/json
+
+###
+
+GET {{MotorHome.Api_HostAddress}}/api/profile/11111111-1111-1111-1111-111111111111
+Accept: application/json
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/auth/sign-up
+Content-Type: application/json
+
+{
+  "userName": "Demo Member",
+  "email": "demo@example.com",
+  "password": "Password123!",
+  "verificationCode": "123456"
+}
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "demo@example.com",
+  "password": "Password123!"
+}
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "demo@example.com",
+  "newPassword": "NewPassword123!",
+  "verificationCode": "anything"
+}
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/verification/identity
+Content-Type: application/json
+
+{
+  "email": "demo@example.com",
+  "legalFirstName": "Demo",
+  "legalLastName": "Member",
+  "dateOfBirth": "1990-01-01",
+  "licenceNumber": "DL123456",
+  "versionNumber": "001",
+  "frontLicenceFileName": "front.png",
+  "backLicenceFileName": "back.png",
+  "confirmationAccepted": true
+}
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/enquiries
+Content-Type: application/json
+
+{
+  "listingId": 1,
+  "senderId": "00000000-0000-0000-0000-000000000001",
+  "senderName": "Demo Member",
+  "message": "I would like to ask about this listing and discuss a possible direct exchange.",
+  "disclaimerAccepted": true,
+  "enquiryType": "Direct Exchange",
+  "offeredListingId": null
+}
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/enquiries/1/cancel
+Content-Type: application/json
+
+{
+  "senderId": "00000000-0000-0000-0000-000000000001"
+}
+
+###
+
+GET {{MotorHome.Api_HostAddress}}/api/enquiries/user/11111111-1111-1111-1111-111111111111
+Accept: application/json
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/enquiries/4/agree-to-discuss
+Content-Type: application/json
+
+{
+  "receiverId": "00000000-0000-0000-0000-000000000001"
+}
+
+###
+
+POST {{MotorHome.Api_HostAddress}}/api/enquiries/4/decline
+Content-Type: application/json
+
+{
+  "receiverId": "00000000-0000-0000-0000-000000000001"
+}

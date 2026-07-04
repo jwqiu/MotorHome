@@ -2,35 +2,33 @@ import { type FormEvent, useState } from 'react'
 import heroBackground from '../../assets/FMA-Motorhome-Seniors_1040286186.jpg'
 import ModernSelect from '../listing/ModernSelect'
 
-const citiesByCountry: Record<string, string[]> = {
-  'New Zealand': ['Auckland', 'Wellington', 'Christchurch', 'Queenstown', 'Hamilton'],
-  Australia: ['Sydney', 'Melbourne', 'Brisbane', 'Perth', 'Adelaide'],
-  Canada: ['Toronto', 'Vancouver', 'Montreal', 'Calgary', 'Ottawa'],
-  'United States': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'San Francisco'],
-  'United Kingdom': ['London', 'Manchester', 'Birmingham', 'Edinburgh', 'Glasgow'],
+const categoryOptions = ['Vehicles', 'Accommodation', 'Canal Boats']
+const listingTypesByCategory: Record<string, string[]> = {
+  Vehicles: ['MotorHome/RV', 'Campervan', 'Caravan'],
+  Accommodation: ['Home', 'Holiday Home'],
+  'Canal Boats': ['Canal Boats'],
 }
 
 function HeroSearchSection() {
-  const [selectedCountry, setSelectedCountry] = useState('')
-  const [selectedCity, setSelectedCity] = useState('')
-  const countryOptions = Object.keys(citiesByCountry)
-  const cityOptions = selectedCountry ? citiesByCountry[selectedCountry] : []
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [selectedListingType, setSelectedListingType] = useState('')
+  const listingTypeOptions = selectedCategory ? listingTypesByCategory[selectedCategory] : []
 
-  const handleCountryChange = (country: string) => {
-    setSelectedCountry(country)
-    setSelectedCity('')
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category)
+    setSelectedListingType(listingTypesByCategory[category].length === 1 ? listingTypesByCategory[category][0] : '')
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
-    if (!selectedCountry || !selectedCity) {
+    if (!selectedCategory || !selectedListingType) {
       return
     }
 
     const params = new URLSearchParams({
-      city: selectedCity,
-      country: selectedCountry,
+      category: selectedCategory,
+      listingType: selectedListingType,
     })
 
     window.location.href = `/listings?${params.toString()}`
@@ -54,7 +52,7 @@ function HeroSearchSection() {
           id="hero-search-title"
           className="font-outfit m-0 text-center text-2xl leading-[1.2] font-medium text-white"
         >
-          Exchange what you need for your next adventure.
+          Exchange what you have for your next adventure
         </h1>
 
         <form
@@ -63,26 +61,26 @@ function HeroSearchSection() {
           role="search"
         >
           <ModernSelect
-            ariaLabel="Destination country"
-            className={selectedCountry ? 'flex-1' : 'w-full'}
-            onChange={handleCountryChange}
-            options={countryOptions}
-            placeholder="Select Country"
-            value={selectedCountry}
+            ariaLabel="Listing category"
+            className={selectedCategory ? 'flex-1' : 'w-full'}
+            onChange={handleCategoryChange}
+            options={categoryOptions}
+            placeholder="Select a category"
+            value={selectedCategory}
           />
 
-          {selectedCountry ? (
+          {selectedCategory ? (
             <ModernSelect
-              ariaLabel="Destination city"
+              ariaLabel="Listing type"
               className="flex-1"
-              onChange={setSelectedCity}
-              options={cityOptions}
-              placeholder="Select City"
-              value={selectedCity}
+              onChange={setSelectedListingType}
+              options={listingTypeOptions}
+              placeholder="Select a type"
+              value={selectedListingType}
             />
           ) : null}
 
-          {selectedCity ? (
+          {selectedListingType ? (
             <button
               className="font-outfit min-h-12 cursor-pointer rounded-4xl border-0 bg-blue-500 px-9 text-base font-extrabold text-white transition hover:bg-blue-600 sm:min-w-[128px]"
               type="submit"

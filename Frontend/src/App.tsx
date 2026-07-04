@@ -3,9 +3,11 @@ import HomePage from './pages/HomePage'
 import IdentityVerificationPage from './pages/IdentityVerificationPage'
 import ListingDetailPage from './pages/ListingDetailPage'
 import ListingsPage from './pages/ListingsPage'
+import ManageListingFormPage from './pages/ManageListingFormPage'
 import ReceivedEnquiryDetailPage from './pages/ReceivedEnquiryDetailPage'
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
+import SentEnquiryDetailPage from './pages/SentEnquiryDetailPage'
 import UserCenterPage from './pages/UserCenterPage'
 
 function App() {
@@ -37,6 +39,14 @@ function App() {
 
   if (path.startsWith('/user-center/enquiries/received/')) {
     return <ReceivedEnquiryDetailPage />
+  }
+
+  if (path.startsWith('/user-center/enquiries/sent/')) {
+    return <SentEnquiryDetailPage />
+  }
+
+  if (path === '/user-center/listings/new' || path.match(/^\/user-center\/listings\/[^/]+\/edit$/)) {
+    return <ManageListingFormPage />
   }
 
   if (path === '/user-center') {
