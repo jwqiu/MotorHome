@@ -88,6 +88,7 @@ function ListingsPage() {
               <ListingFilters initialFilters={appliedFilters} onApplyFilters={handleApplyFilters} />
             </div>
             <div className="min-w-0">
+              <div className="mb-6 hidden min-h-12 xl:flex" aria-hidden="true" />
               {listingLoadMessage ? (
                 <div className="mb-6 rounded-3xl bg-red-50 px-6 py-4 text-sm font-extrabold text-red-500">
                   {listingLoadMessage}
