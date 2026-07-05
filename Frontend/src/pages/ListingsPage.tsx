@@ -94,15 +94,23 @@ function ListingsPage() {
                 </div>
               ) : null}
               {isLoadingListings ? (
-                <div className="rounded-4xl bg-white p-10 text-center shadow-lg shadow-blue-100">
-                  <p className="font-outfit m-0 text-2xl font-extrabold text-gray-800">Loading listings...</p>
+                <div className="flex min-h-[180px] items-center justify-center rounded-4xl bg-white p-10 text-center shadow-lg shadow-blue-100">
+                  <div className="flex items-center justify-center gap-3">
+                    <span
+                      className="h-6 w-6 animate-spin rounded-full border-3 border-blue-100 border-t-blue-500"
+                      aria-hidden="true"
+                    />
+                    <p className="font-outfit m-0 text-2xl font-extrabold text-gray-800">Loading results...</p>
+                  </div>
                 </div>
               ) : (
                 <ListingResults listings={filteredListings} />
               )}
-              <div className="mt-8">
-                <ListingPagination totalListings={filteredListings.length} />
-              </div>
+              {!isLoadingListings ? (
+                <div className="mt-8">
+                  <ListingPagination totalListings={filteredListings.length} />
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
