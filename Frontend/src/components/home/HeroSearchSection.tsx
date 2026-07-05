@@ -65,7 +65,7 @@ function HeroSearchSection() {
             className={selectedCategory ? 'flex-1' : 'w-full'}
             onChange={handleCategoryChange}
             options={categoryOptions}
-            placeholder="Select a category"
+            placeholder="What are you looking for?"
             value={selectedCategory}
           />
 

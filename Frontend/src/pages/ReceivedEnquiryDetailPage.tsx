@@ -332,7 +332,7 @@ function ReceivedEnquiryDetailPage() {
                 </span>
                 <a
                   className="mt-1 inline-flex font-extrabold text-blue-500 no-underline hover:text-blue-600"
-                  href="about:blank"
+                  href="/exchange-disclaimer.pdf"
                   rel="noreferrer"
                   target="_blank"
                 >

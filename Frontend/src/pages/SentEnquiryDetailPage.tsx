@@ -267,7 +267,7 @@ function SentEnquiryDetailPage() {
               </div>
               <div className="grid gap-2 border-b border-blue-50 pb-4 md:grid-cols-[180px_1fr] md:gap-6">
                 <dt className="text-sm font-extrabold text-gray-800">Owner email</dt>
-                <dd className="m-0 text-sm leading-6 text-gray-500">{getOwnerEmailDisplay(enquiry)}</dd>
+                <dd className="m-0 text-sm leading-6 text-red-500">{getOwnerEmailDisplay(enquiry)}</dd>
               </div>
               <div className="grid gap-2 border-b border-blue-50 pb-4 md:grid-cols-[180px_1fr] md:gap-6">
                 <dt className="text-sm font-extrabold text-gray-800">Date sent</dt>

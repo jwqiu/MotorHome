@@ -17,6 +17,7 @@ function ForgotPasswordPage() {
   const passwordsDoNotMatch = Boolean(confirmPassword) && password !== confirmPassword
   const canContinue = Boolean(email && verificationCode)
   const canUpdatePassword = isCodeVerified && Boolean(password && confirmPassword) && !passwordsDoNotMatch
+  const verificationSuccessMessage = 'Verification code has been automatically filled. Please continue.'
 
   useEffect(() => {
     if (!isPasswordUpdated) {
@@ -42,7 +43,8 @@ function ForgotPasswordPage() {
     }
 
     setIsCodeSent(true)
-    setMessage('Verification code sent. Use any code to continue for now.')
+    setVerificationCode('*****')
+    setMessage(verificationSuccessMessage)
   }
 
   const handleContinue = (event: FormEvent<HTMLFormElement>) => {
@@ -110,27 +112,43 @@ function ForgotPasswordPage() {
               Verification code
               <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
                 <button
-                  className="h-13 cursor-pointer rounded-4xl border border-blue-100 bg-blue-50 px-4 text-sm font-extrabold text-blue-600 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-300"
-                  disabled={!email}
+                  className={`h-13 rounded-4xl border px-4 text-sm font-extrabold transition ${
+                    !email || isCodeSent
+                      ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 shadow-inner'
+                      : 'cursor-pointer border-blue-100 bg-blue-50 text-blue-600 hover:bg-blue-100'
+                  }`}
+                  disabled={!email || isCodeSent}
                   onClick={handleSendCode}
                   type="button"
                 >
-                  Send Code
+                  {isCodeSent ? 'Code Sent' : 'Send Code'}
                 </button>
                 <input
                   autoComplete="one-time-code"
-                  className="h-13 min-w-0 rounded-4xl border border-blue-100 bg-white px-5 text-sm font-bold text-gray-700 outline-0 transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-gray-50 disabled:text-gray-300"
+                  aria-readonly={isCodeSent}
+                  className={`h-13 min-w-0 rounded-4xl border px-5 text-sm font-bold outline-0 transition disabled:bg-gray-50 disabled:text-gray-300 ${
+                    isCodeSent
+                      ? 'pointer-events-none cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500 shadow-inner'
+                      : 'border-blue-100 bg-white text-gray-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
+                  }`}
                   disabled={!isCodeSent}
                   name="verificationCode"
                   onChange={(event) => setVerificationCode(event.target.value)}
                   placeholder="Enter code"
+                  readOnly={isCodeSent}
+                  tabIndex={isCodeSent ? -1 : undefined}
                   value={verificationCode}
                 />
               </div>
             </label>
             {message ? (
-              <p className="m-0 text-xs leading-5 text-gray-400">
-                {message}
+              <p className={`m-0 flex mt-2 items-center gap-2 text-xs leading-5 ${message === verificationSuccessMessage ? 'font-bold text-green-600' : 'text-gray-400'}`}>
+                {message === verificationSuccessMessage ? (
+                  <span aria-hidden="true" className="text-base leading-none">
+                    ✅
+                  </span>
+                ) : null}
+                <span>{message}</span>
               </p>
             ) : null}
           </div>
