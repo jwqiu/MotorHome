@@ -1,3 +1,5 @@
+import { apiFetch } from '../api/apiClient'
+
 type AuthUser = {
   id: string
   userName: string
@@ -10,7 +12,7 @@ type ErrorResponse = {
 }
 
 async function postAuth<TRequest>(path: string, body: TRequest) {
-  const response = await window.fetch(`/api/auth/${path}`, {
+  const response = await apiFetch(`/api/auth/${path}`, {
     body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',

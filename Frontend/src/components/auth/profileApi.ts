@@ -1,3 +1,5 @@
+import { apiFetch } from '../api/apiClient'
+
 type ErrorResponse = {
   message?: string
 }
@@ -14,7 +16,7 @@ export type ProfileResponse = {
 }
 
 export async function getProfile(userId: string) {
-  const response = await window.fetch(`/api/profile/${encodeURIComponent(userId)}`)
+  const response = await apiFetch(`/api/profile/${encodeURIComponent(userId)}`)
 
   if (!response.ok) {
     let errorMessage = 'Unable to load profile. Please try again.'
@@ -33,7 +35,7 @@ export async function getProfile(userId: string) {
 }
 
 export async function updateIntroduction(userId: string, introduction: string) {
-  const response = await window.fetch(`/api/profile/${encodeURIComponent(userId)}/introduction`, {
+  const response = await apiFetch(`/api/profile/${encodeURIComponent(userId)}/introduction`, {
     body: JSON.stringify({ introduction }),
     headers: {
       'Content-Type': 'application/json',

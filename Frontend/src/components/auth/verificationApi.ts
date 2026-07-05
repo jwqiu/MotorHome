@@ -1,3 +1,5 @@
+import { apiFetch } from '../api/apiClient'
+
 type VerificationResponse = {
   id: string
   email: string
@@ -21,7 +23,7 @@ type IdentityVerificationRequest = {
 }
 
 export async function verifyIdentity(payload: IdentityVerificationRequest) {
-  const response = await window.fetch('/api/verification/identity', {
+  const response = await apiFetch('/api/verification/identity', {
     body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json',

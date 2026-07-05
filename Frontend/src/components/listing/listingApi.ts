@@ -1,4 +1,5 @@
 import { getListingImageByListingId, type Listing, type ListingFiltersValue } from './listingData'
+import { apiFetch } from '../api/apiClient'
 
 export type ListingOwnerResponse = {
   about: string
@@ -60,7 +61,7 @@ export type SaveListingPayload = {
 }
 
 export async function getListingDetail(slug: string) {
-  const response = await window.fetch(`/api/listing/${encodeURIComponent(slug)}`)
+  const response = await apiFetch(`/api/listing/${encodeURIComponent(slug)}`)
 
   if (!response.ok) {
     let errorMessage = 'Unable to load listing details. Please try again.'
@@ -95,7 +96,7 @@ export async function getListings(filters: ListingFiltersValue) {
   })
 
   const queryString = params.toString()
-  const response = await window.fetch(`/api/listing${queryString ? `?${queryString}` : ''}`)
+  const response = await apiFetch(`/api/listing${queryString ? `?${queryString}` : ''}`)
 
   if (!response.ok) {
     let errorMessage = 'Unable to load listings. Please try again.'
@@ -115,7 +116,7 @@ export async function getListings(filters: ListingFiltersValue) {
 }
 
 export async function getOwnerListings(ownerId: string) {
-  const response = await window.fetch(`/api/listing/owner/${encodeURIComponent(ownerId)}`)
+  const response = await apiFetch(`/api/listing/owner/${encodeURIComponent(ownerId)}`)
 
   if (!response.ok) {
     let errorMessage = 'Unable to load your listings. Please try again.'
@@ -135,7 +136,7 @@ export async function getOwnerListings(ownerId: string) {
 }
 
 export async function createListing(payload: SaveListingPayload) {
-  const response = await window.fetch('/api/listing', {
+  const response = await apiFetch('/api/listing', {
     body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json',
@@ -147,7 +148,7 @@ export async function createListing(payload: SaveListingPayload) {
 }
 
 export async function updateListing(listingId: number, payload: SaveListingPayload) {
-  const response = await window.fetch(`/api/listing/${listingId}`, {
+  const response = await apiFetch(`/api/listing/${listingId}`, {
     body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json',
@@ -159,7 +160,7 @@ export async function updateListing(listingId: number, payload: SaveListingPaylo
 }
 
 export async function deleteListing(listingId: number, ownerId: string) {
-  const response = await window.fetch(`/api/listing/${listingId}?ownerId=${encodeURIComponent(ownerId)}`, {
+  const response = await apiFetch(`/api/listing/${listingId}?ownerId=${encodeURIComponent(ownerId)}`, {
     method: 'DELETE',
   })
 

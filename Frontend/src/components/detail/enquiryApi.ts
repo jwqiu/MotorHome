@@ -1,3 +1,5 @@
+import { apiFetch } from '../api/apiClient'
+
 type EnquiryResponse = {
   id: number
   listingId: number
@@ -72,7 +74,7 @@ type SubmitEnquiryRequest = {
 }
 
 export async function submitEnquiry(payload: SubmitEnquiryRequest) {
-  const response = await window.fetch('/api/enquiries', {
+  const response = await apiFetch('/api/enquiries', {
     body: JSON.stringify(payload),
     headers: {
       'Content-Type': 'application/json',
@@ -99,7 +101,7 @@ export async function submitEnquiry(payload: SubmitEnquiryRequest) {
 }
 
 export async function cancelEnquiry(enquiryId: number, senderId?: string) {
-  const response = await window.fetch(`/api/enquiries/${enquiryId}/cancel`, {
+  const response = await apiFetch(`/api/enquiries/${enquiryId}/cancel`, {
     body: JSON.stringify({ senderId }),
     headers: {
       'Content-Type': 'application/json',
@@ -132,7 +134,7 @@ export async function declineEnquiry(enquiryId: number, receiverId: string, owne
 }
 
 export async function getUserEnquiries(userId: string) {
-  const response = await window.fetch(`/api/enquiries/user/${encodeURIComponent(userId)}`)
+  const response = await apiFetch(`/api/enquiries/user/${encodeURIComponent(userId)}`)
 
   if (!response.ok) {
     let errorMessage = 'Unable to load enquiries. Please try again.'
@@ -151,7 +153,7 @@ export async function getUserEnquiries(userId: string) {
 }
 
 export async function getExchangeListings(userId: string, excludeListingId: number) {
-  const response = await window.fetch(
+  const response = await apiFetch(
     `/api/enquiries/exchange-listings/${encodeURIComponent(userId)}?excludeListingId=${encodeURIComponent(excludeListingId)}`,
   )
 
@@ -172,7 +174,7 @@ export async function getExchangeListings(userId: string, excludeListingId: numb
 }
 
 export async function getEnquiryStatus(listingId: number, senderId: string) {
-  const response = await window.fetch(
+  const response = await apiFetch(
     `/api/enquiries/status?listingId=${encodeURIComponent(listingId)}&senderId=${encodeURIComponent(senderId)}`,
   )
 
@@ -198,7 +200,7 @@ async function submitEnquiryDecision(
   receiverId: string,
   ownerResponse?: string,
 ) {
-  const response = await window.fetch(`/api/enquiries/${enquiryId}/${action}`, {
+  const response = await apiFetch(`/api/enquiries/${enquiryId}/${action}`, {
     body: JSON.stringify({ ownerResponse, receiverId }),
     headers: {
       'Content-Type': 'application/json',
