@@ -67,7 +67,7 @@ function ModernSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         disabled={disabled}
-        className={`flex h-12 w-full cursor-pointer items-center justify-between gap-3 rounded-4xl border border-blue-100 bg-white px-5 text-left text-sm shadow-md shadow-blue-100/70 outline-0 transition-all duration-200 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-300 disabled:shadow-none ${
+        className={`flex h-12 w-full cursor-pointer items-center justify-between gap-3 rounded-4xl border border-blue-100 bg-white/80 px-5 text-left text-sm shadow-md shadow-blue-100/70 outline-0 transition-all duration-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-300 disabled:shadow-none ${
           value ? 'text-gray-600' : 'text-gray-400'
         }`}
         onClick={() => setIsOpen((current) => !current)}
@@ -84,7 +84,7 @@ function ModernSelect({
 
       {isOpen ? (
         <div
-          className="absolute top-[calc(100%+8px)] right-0 left-0 z-30 overflow-hidden rounded-3xl border border-blue-100 bg-white py-2 shadow-xl shadow-blue-100/80"
+          className="absolute top-[calc(100%+8px)] right-0 left-0 z-30 overflow-hidden rounded-3xl border border-blue-100 bg-white/80 py-2 shadow-xl shadow-blue-100/80 backdrop-blur-sm"
           role="listbox"
         >
           {options.map((option) => {
@@ -97,8 +97,8 @@ function ModernSelect({
                 aria-selected={isSelected}
                 className={`flex min-h-11 w-full cursor-pointer items-center px-5 text-left text-sm font-extrabold transition-colors ${
                   isSelected
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-500'
+                    ? 'text-blue-600 hover:bg-gray-50/80'
+                    : 'bg-transparent text-gray-600  hover:bg-gray-50/80 '
                 }`}
                 key={optionValue}
                 onClick={() => handleOptionClick(option)}
