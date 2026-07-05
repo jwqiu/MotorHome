@@ -88,20 +88,22 @@ function ListingsPage() {
               <ListingFilters initialFilters={appliedFilters} onApplyFilters={handleApplyFilters} />
             </div>
             <div className="min-w-0">
-              <div className="mb-6 hidden min-h-12 xl:flex" aria-hidden="true" />
               {listingLoadMessage ? (
                 <div className="mb-6 rounded-3xl bg-red-50 px-6 py-4 text-sm font-extrabold text-red-500">
                   {listingLoadMessage}
                 </div>
               ) : null}
               {isLoadingListings ? (
-                <div className="flex min-h-[180px] items-center justify-center rounded-4xl bg-white p-10 text-center shadow-lg shadow-blue-100">
-                  <div className="flex items-center justify-center gap-3">
-                    <span
-                      className="h-6 w-6 animate-spin rounded-full border-3 border-blue-100 border-t-blue-500"
-                      aria-hidden="true"
-                    />
-                    <p className="font-outfit m-0 text-2xl font-extrabold text-gray-800">Loading results...</p>
+                <div>
+                  <div className="mb-6 hidden min-h-12 xl:flex" aria-hidden="true" />
+                  <div className="flex min-h-[180px] items-center justify-center rounded-4xl bg-white p-10 text-center shadow-lg shadow-blue-100">
+                    <div className="flex items-center justify-center gap-3">
+                      <span
+                        className="h-6 w-6 animate-spin rounded-full border-3 border-blue-100 border-t-blue-500"
+                        aria-hidden="true"
+                      />
+                      <p className="font-outfit m-0 text-2xl font-extrabold text-gray-800">Loading results...</p>
+                    </div>
                   </div>
                 </div>
               ) : (
