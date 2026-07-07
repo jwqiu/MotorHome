@@ -19,3 +19,4 @@ Backend/appsettings.Development.json
 .vs/
 .vscode/*
 !.vscode/settings.json
+*.png

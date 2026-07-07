@@ -1,23 +1,31 @@
 const memberStories = [
   {
-    name: 'Member Name',
+    name: 'James Whitaker',
+    initials: 'JW',
+    avatarClassName: 'bg-sky-100 text-sky-700',
     quote:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean euismod bibendum laoreet.',
+      'We swapped our Auckland motorhome for three weeks in Devon. The listing details were accurate, the handover was easy, and we felt looked after from the first message.',
   },
   {
-    name: 'Member Name',
+    name: 'Emma Collins',
+    initials: 'EC',
+    avatarClassName: 'bg-rose-100 text-rose-700',
     quote:
-      'Proin gravida dolor sit amet lacus accumsan et viverra justo commodo.',
+      'The enquiry process made it simple to compare dates, insurance notes, and vehicle features. We found a tidy campervan for the South Island in less than a week.',
   },
   {
-    name: 'Member Name',
+    name: 'Daniel Moore',
+    initials: 'DM',
+    avatarClassName: 'bg-emerald-100 text-emerald-700',
     quote:
-      'Sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus.',
+      'I liked being able to speak directly with another owner before committing. It made the exchange feel personal, practical, and much less stressful.',
   },
   {
-    name: 'Member Name',
+    name: 'Sophie Laurent',
+    initials: 'SL',
+    avatarClassName: 'bg-amber-100 text-amber-700',
     quote:
-      'Nam fermentum, nulla luctus pharetra vulputate, felis tellus mollis orci.',
+      'Our family used the site to arrange a summer rental near Queenstown. The photos matched the vehicle, the owner replied quickly, and the whole trip felt smooth.',
   },
 ]
 
@@ -38,7 +46,12 @@ function MemberStoriesSection() {
               className="grid grid-cols-[180px_1fr] gap-8 rounded-4xl bg-white p-6 shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105"
               key={`${story.name}-${index}`}
             >
-              <div className="h-[150px] rounded-4xl bg-gray-100" aria-hidden="true" />
+              <div
+                className={`font-outfit flex h-[150px] w-full items-center justify-center rounded-4xl text-4xl font-bold ${story.avatarClassName}`}
+                aria-hidden="true"
+              >
+                {story.initials}
+              </div>
 
               <div className="flex flex-col justify-center">
                 <h3 className="font-outfit mb-3 text-lg font-bold text-gray-700">
