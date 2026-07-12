@@ -61,24 +61,24 @@ function getPostedAt(createdAt: string) {
 
 function BrowseListingsSection() {
   return (
-    <section className="w-full bg-white px-16 py-16 mb-16" aria-labelledby="browse-listings-title">
-      <h2
+    <section className="mb-12 w-full bg-white px-4 py-10 sm:px-8 sm:py-12 lg:mb-16 lg:px-16 lg:py-16" aria-labelledby="browse-listings-title">
+      {/* <h2
         id="browse-listings-title"
-        className="font-outfit mb-12 text-center text-2xl font-bold text-gray-700"
+        className="font-outfit mb-8 text-center text-lg sm:text-2xl font-bold text-gray-700 sm:mb-12"
       >
         Find exchange opportunities for your next adventure
-      </h2>
+      </h2> */}
 
-      <div className="rounded-4xl bg-gray-50 px-16 py-14 shadow-lg shadow-gray-200">
+      <div className="rounded-4xl sm:bg-gray-50 px-4 py-7 sm:shadow-lg sm:shadow-gray-200 sm:px-8 sm:py-10 lg:px-16 lg:py-14">
         <div className="mb-12">
-          <h3 className="font-outfit mb-6 text-2xl font-bold text-gray-700">
+          <h3 className="font-outfit mb-6 text-lg sm:text-2xl text-gray-700">
             Browse by Category
           </h3>
 
-          <div className="grid grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3 lg:gap-12">
             {categoryGroups.map((group) => (
               <article
-                className="rounded-4xl bg-white p-8 shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105"
+                className="rounded-4xl bg-gray-50 sm:bg-white p-6 shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105 lg:p-8"
                 key={group.title}
               >
                 <h4 className="mb-6 flex items-center gap-3 text-xl font-bold text-gray-700">
@@ -106,11 +106,11 @@ function BrowseListingsSection() {
         </div>
 
         <div>
-          <h3 className="font-outfit mb-6 text-2xl font-bold text-gray-700">
+          <h3 className="font-outfit mb-6 sm:text-2xl text-gray-700">
             Latest Listings
           </h3>
 
-          <div className="grid grid-cols-4 gap-10">
+          <div className="grid  gap-6 grid-cols-2 lg:grid-cols-4 lg:gap-10">
             {latestListings.map((listing) => (
               <a
                 className="rounded-4xl bg-white  text-gray-500 no-underline shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105"
@@ -118,11 +118,11 @@ function BrowseListingsSection() {
                 key={listing.id}
               >
                 <img
-                  className=" h-[180px] w-full rounded-t-4xl bg-gray-100 object-cover"
+                  className="sm:h-[180px] w-full rounded-t-4xl bg-gray-100 object-cover"
                   src={listing.imageSrc}
                   alt=""
                 />
-                <div className="flex flex-col gap-2 p-4">
+                <div className="flex flex-col bg-white/40 gap-1 p-4">
                   <h4 className="mb-2 line-clamp-2 min-h-[24px] text-base leading-6 font-bold text-gray-700">
                     {listing.title}
                   </h4>

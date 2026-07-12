@@ -36,7 +36,7 @@ function HeroSearchSection() {
 
   return (
     <section
-      className="relative mb-7 grid min-h-[620px] w-full place-items-center overflow-hidden"
+      className="relative mb-0 sm:mb-6 grid min-h-[540px] w-full place-items-center overflow-hidden sm:min-h-[620px]"
       aria-labelledby="hero-search-title"
     >
       <img
@@ -47,16 +47,16 @@ function HeroSearchSection() {
       />
       <div className="absolute inset-0 bg-black/30" aria-hidden="true" />
 
-      <div className="relative flex w-full max-w-[860px] -translate-y-[18px] flex-col items-center gap-9 px-6">
+      <div className="relative flex w-full max-w-[860px] flex-col items-center gap-7 px-4 sm:-translate-y-[18px] sm:gap-9 sm:px-6">
         <h1
           id="hero-search-title"
-          className="font-outfit m-0 text-center text-2xl leading-[1.2] font-medium text-white"
+          className="font-outfit m-0 text-center text-lg sm:text-2xl leading-[1.2] font-medium text-white"
         >
           Exchange what you have for your next adventure
         </h1>
 
         <form
-          className="flex  w-full flex-col gap-3 rounded-4xl  sm:flex-row sm:items-center"
+          className="flex w-1/2 sm:w-full flex-col gap-3 rounded-4xl  sm:flex-row sm:items-center"
           onSubmit={handleSubmit}
           role="search"
         >

@@ -4,7 +4,7 @@ function HomeCtaSection() {
   const isSignedIn = isAuthenticated()
 
   return (
-    <section className="w-full px-16 pb-16" aria-labelledby="home-cta-title">
+    <section className="w-full px-4 pb-10 sm:px-8 sm:pb-12 lg:px-16 lg:pb-16" aria-labelledby="home-cta-title">
       <h2
         id="home-cta-title"
         className="font-outfit mb-8 text-center text-2xl font-bold text-gray-700"
@@ -12,7 +12,7 @@ function HomeCtaSection() {
         Ready to start your next adventure?
       </h2>
 
-        <div className="flex items-center justify-center gap-8">
+        <div className="flex items-stretch justify-center gap-4 sm:flex-row sm:items-center sm:gap-8">
           <a
             className="inline-flex min-h-[42px] min-w-[150px] items-center justify-center rounded-4xl border border-gray-300 bg-white px-8 text-sm font-extrabold text-gray-600 no-underline transition-transform duration-200 hover:scale-110 hover:text-blue-500"
             href="/listings"

@@ -31,23 +31,23 @@ const memberStories = [
 
 function MemberStoriesSection() {
   return (
-    <section className="w-full px-16 py-16 mb-16" aria-labelledby="member-stories-title">
+    <section className="mb-12 w-full px-4 py-10 sm:px-8 sm:py-12 lg:mb-16 lg:px-16 lg:py-16" aria-labelledby="member-stories-title">
       <h2
         id="member-stories-title"
-        className="font-outfit mb-12 text-center text-2xl font-bold text-gray-700"
+        className="font-outfit mb-8 text-center text-2xl font-bold text-gray-700 sm:mb-12"
       >
         What our members say
       </h2>
 
-      <div className="rounded-4xl bg-gray-50 px-16 py-14 shadow-lg shadow-gray-200">
-        <div className="grid grid-cols-2 gap-12">
+      <div className="rounded-4xl bg-gray-50 px-4 py-7 shadow-lg shadow-gray-200 sm:px-8 sm:py-10 lg:px-16 lg:py-14">
+        <div className="grid grid-cols-2 gap-4 lg:gap-12">
           {memberStories.map((story, index) => (
             <article
-              className="grid grid-cols-[180px_1fr] gap-8 rounded-4xl bg-white p-6 shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105"
+              className="grid grid-cols-1 gap-5 rounded-4xl bg-white p-5 shadow-md shadow-gray-200 transition-transform duration-200 hover:scale-105 sm:grid-cols-[150px_1fr] sm:gap-6 sm:p-6 xl:grid-cols-[180px_1fr] xl:gap-8"
               key={`${story.name}-${index}`}
             >
               <div
-                className={`font-outfit flex h-[150px] w-full items-center justify-center rounded-4xl text-4xl font-bold ${story.avatarClassName}`}
+                className={`font-outfit flex h-24 w-full items-center justify-center rounded-4xl text-4xl font-bold sm:h-[150px] ${story.avatarClassName}`}
                 aria-hidden="true"
               >
                 {story.initials}

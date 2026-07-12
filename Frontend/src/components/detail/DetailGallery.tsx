@@ -10,7 +10,7 @@ function DetailGallery({ imageLabel, photos }: DetailGalleryProps) {
 
   return (
     <section aria-label="Listing photos">
-      <div className="overflow-hidden rounded-4xl bg-white shadow-lg shadow-blue-100">
+      <div className="overflow-hidden rounded-4xl bg-white shadow-lg mt-6 sm:mt-0 shadow-blue-100">
         <div className="relative aspect-[16/10] bg-blue-50">
           <img
             alt={imageLabel}
