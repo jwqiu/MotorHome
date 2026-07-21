@@ -8,6 +8,7 @@ public class MotorHomeDbContext(DbContextOptions<MotorHomeDbContext> options) : 
     public DbSet<User> Users => Set<User>();
     public DbSet<Listing> Listings => Set<Listing>();
     public DbSet<Enquiry> Enquiries => Set<Enquiry>();
+    public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -112,5 +113,47 @@ public class MotorHomeDbContext(DbContextOptions<MotorHomeDbContext> options) : 
         enquiry.Property(currentEnquiry => currentEnquiry.CancelledAt).HasColumnName("cancelled_at");
         enquiry.Property(currentEnquiry => currentEnquiry.CreatedAt).HasColumnName("created_at");
         enquiry.Property(currentEnquiry => currentEnquiry.UpdatedAt).HasColumnName("updated_at");
+
+        var emailVerificationCode = modelBuilder.Entity<EmailVerificationCode>();
+
+        emailVerificationCode.ToTable("email_verification_codes");
+
+        emailVerificationCode.HasKey(currentCode => currentCode.Id);
+
+        emailVerificationCode
+            .HasIndex(currentCode => new
+            {
+                currentCode.Email,
+                currentCode.Purpose
+            })
+            .IsUnique();
+
+        emailVerificationCode
+            .Property(currentCode => currentCode.Id)
+            .HasColumnName("id");
+
+        emailVerificationCode
+            .Property(currentCode => currentCode.Email)
+            .HasColumnName("email");
+
+        emailVerificationCode
+            .Property(currentCode => currentCode.Purpose)
+            .HasColumnName("purpose");
+
+        emailVerificationCode
+            .Property(currentCode => currentCode.CodeHash)
+            .HasColumnName("code_hash");
+
+        emailVerificationCode
+            .Property(currentCode => currentCode.ExpiresAt)
+            .HasColumnName("expires_at");
+
+        emailVerificationCode
+            .Property(currentCode => currentCode.CreatedAt)
+            .HasColumnName("created_at");
+
+        emailVerificationCode
+            .Property(currentCode => currentCode.UsedAt)
+            .HasColumnName("used_at");
     }
 }

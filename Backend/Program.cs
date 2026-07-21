@@ -8,6 +8,13 @@ const string FrontendCorsPolicy = "FrontendCorsPolicy";
 builder.Services.AddDbContext<MotorHomeDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("MotorHome")));
 builder.Services.AddScoped<PasswordHashService>();
+
+builder.Services.AddHttpClient<EmailService>(client =>
+{
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("MotorHome.Api/1.0");
+    client.Timeout = TimeSpan.FromSeconds(10);
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(FrontendCorsPolicy, policy =>
@@ -31,6 +38,31 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.MapPost(
+        "/api/dev/test-email",
+        async (
+            EmailService emailService,
+            CancellationToken cancellationToken) =>
+        {
+            var recipient = builder.Configuration["Email:TestRecipient"];
+
+            if (string.IsNullOrWhiteSpace(recipient))
+            {
+                return Results.Problem(
+                    "Email:TestRecipient is not configured.");
+            }
+
+            await emailService.SendSignUpCodeAsync(
+                recipient,
+                "123456",
+                cancellationToken);
+
+            return Results.Ok(new
+            {
+                message = "Test email sent."
+            });
+        });
 }
 
 app.UseHttpsRedirection();
