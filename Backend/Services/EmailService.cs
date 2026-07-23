@@ -96,5 +96,68 @@ public class EmailService(
             html,
             cancellationToken);
     }
-}
 
+    public Task SendEnquiryNotificationAsync(
+        string recipient,
+        string receiverName,
+        string senderName,
+        string listingTitle,
+        CancellationToken cancellationToken)
+    {
+        var appUrl = configuration["Email:AppUrl"];
+
+        if (string.IsNullOrWhiteSpace(appUrl))
+        {
+            throw new InvalidOperationException(
+                "Email:AppUrl is not configured.");
+        }
+
+        var userCenterUrl =
+            $"{appUrl.TrimEnd('/')}/user-center";
+
+        var safeReceiverName =
+            System.Net.WebUtility.HtmlEncode(receiverName);
+
+        var safeSenderName =
+            System.Net.WebUtility.HtmlEncode(senderName);
+
+        var safeListingTitle =
+            System.Net.WebUtility.HtmlEncode(listingTitle);
+
+        var safeUserCenterUrl =
+            System.Net.WebUtility.HtmlEncode(userCenterUrl);
+
+        var subjectListingTitle =
+            listingTitle.ReplaceLineEndings(" ");
+
+        var subject =
+            $"New enquiry about {subjectListingTitle}";
+
+        var html = $"""
+            <h1>You received a new enquiry</h1>
+
+            <p>Hi {safeReceiverName},</p>
+
+            <p>
+                {safeSenderName} sent you an enquiry about
+                <strong>{safeListingTitle}</strong>.
+            </p>
+
+            <p>
+                <a href="{safeUserCenterUrl}">
+                    View the enquiry in your User Center
+                </a>
+            </p>
+
+            <p>
+                Sign in to review the enquiry and respond.
+            </p>
+            """;
+
+        return SendEmailAsync(
+            recipient,
+            subject,
+            html,
+            cancellationToken);
+    }
+}

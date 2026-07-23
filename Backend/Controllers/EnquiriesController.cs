@@ -2,12 +2,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MotorHome.Api.Data;
 using MotorHome.Api.Models;
+using MotorHome.Api.Services;
 
 namespace MotorHome.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class EnquiriesController(MotorHomeDbContext dbContext) : ControllerBase
+public class EnquiriesController(MotorHomeDbContext dbContext, EmailService emailService, ILogger<EnquiriesController> logger) : ControllerBase
 {
     [HttpGet("exchange-listings/{userId}")]
     public async Task<ActionResult<ListingSummaryResponse[]>> GetExchangeListings(
@@ -168,6 +169,24 @@ public class EnquiriesController(MotorHomeDbContext dbContext) : ControllerBase
             return NotFound(new ErrorResponse("Sender account was not found."));
         }
 
+        var receiver = await dbContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(currentUser => currentUser.Id == listing.OwnerId, cancellationToken);
+
+        if (receiver is null)
+        {
+            return NotFound(
+                new ErrorResponse(
+                    "Listing owner account was not found."));
+        }
+
+        if (receiver.Id == sender.Id)
+        {
+            return BadRequest(
+                new ErrorResponse(
+                    "You cannot send an enquiry about your own listing."));
+        }
+
         var now = DateTimeOffset.UtcNow;
         var enquiry = new Enquiry
         {
@@ -187,6 +206,24 @@ public class EnquiriesController(MotorHomeDbContext dbContext) : ControllerBase
 
         dbContext.Enquiries.Add(enquiry);
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await emailService.SendEnquiryNotificationAsync(
+                receiver.Email,
+                receiver.Username,
+                sender.Username,
+                listing.Title,
+                cancellationToken);
+        }
+        catch (Exception exception)
+            when (!cancellationToken.IsCancellationRequested)
+        {
+            logger.LogError(
+                exception,
+                "Failed to send notification email for enquiry {EnquiryId}.",
+                enquiry.Id);
+        }
 
         return Created($"/api/enquiries/{enquiry.Id}", EnquiryResponse.FromEnquiry(enquiry));
     }
