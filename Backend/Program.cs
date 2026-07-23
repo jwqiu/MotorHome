@@ -38,31 +38,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
-    app.MapPost(
-        "/api/dev/test-email",
-        async (
-            EmailService emailService,
-            CancellationToken cancellationToken) =>
-        {
-            var recipient = builder.Configuration["Email:TestRecipient"];
-
-            if (string.IsNullOrWhiteSpace(recipient))
-            {
-                return Results.Problem(
-                    "Email:TestRecipient is not configured.");
-            }
-
-            await emailService.SendSignUpCodeAsync(
-                recipient,
-                "123456",
-                cancellationToken);
-
-            return Results.Ok(new
-            {
-                message = "Test email sent."
-            });
-        });
 }
 
 app.UseHttpsRedirection();

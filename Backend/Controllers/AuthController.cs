@@ -119,6 +119,71 @@ public class AuthController(
         return NoContent();
     }
 
+    [HttpPost("sign-up/code/verify")]
+    public async Task<ActionResult> VerifySignUpCode(
+        VerifySignUpCodeRequest request,
+        CancellationToken cancellationToken)
+    {
+        const string purpose = "sign_up";
+
+        var email = NormalizeEmail(request.Email);
+
+        if (
+            !HasText(email) ||
+            !HasText(request.VerificationCode) ||
+            request.VerificationCode.Length != 6 ||
+            !request.VerificationCode.All(char.IsDigit))
+        {
+            return BadRequest(
+                new ErrorResponse(
+                    "The verification code must contain six digits."));
+        }
+
+        var now = DateTimeOffset.UtcNow;
+
+        var storedCode =
+            await dbContext.EmailVerificationCodes.FirstOrDefaultAsync(
+                currentCode =>
+                    currentCode.Email == email &&
+                    currentCode.Purpose == purpose,
+                cancellationToken);
+
+        if (
+            storedCode is null ||
+            storedCode.UsedAt is not null ||
+            storedCode.ExpiresAt <= now)
+        {
+            return BadRequest(
+                new ErrorResponse(
+                    "The verification code is invalid or has expired."));
+        }
+
+        var hmacKey = configuration["Verification:HmacKey"];
+
+        if (string.IsNullOrWhiteSpace(hmacKey))
+        {
+            throw new InvalidOperationException(
+                "Verification:HmacKey is not configured.");
+        }
+
+        var submittedHash = CalculateCodeHash(
+            request.VerificationCode,
+            hmacKey);
+
+        var codeMatches = CryptographicOperations.FixedTimeEquals(
+            Convert.FromHexString(storedCode.CodeHash),
+            Convert.FromHexString(submittedHash));
+
+        if (!codeMatches)
+        {
+            return BadRequest(
+                new ErrorResponse(
+                    "The verification code is invalid or has expired."));
+        }
+
+        return NoContent();
+    }
+
     [HttpPost("sign-up")]
     public async Task<ActionResult<AuthResponse>> SignUp(
         SignUpRequest request,
@@ -277,6 +342,8 @@ public record ForgotPasswordRequest(string Email, string NewPassword, string Ver
 public record ErrorResponse(string Message);
 
 public record SendSignUpCodeRequest(string Email);
+
+public record VerifySignUpCodeRequest(string Email, string VerificationCode);
 
 public record AuthResponse(Guid Id, string UserName, string Email, bool IdentityVerified)
 {

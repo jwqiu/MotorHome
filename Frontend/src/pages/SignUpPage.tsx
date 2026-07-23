@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import AuthShell from '../components/auth/AuthShell'
-import { signUp } from '../components/auth/authApi'
+import {sendSignUpCode, signUp, verifySignUpCode} from '../components/auth/authApi'
 import AuthTextField from '../components/auth/AuthTextField'
 import { signInSession } from '../components/auth/authSession'
 
@@ -11,27 +11,46 @@ function SignUpPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
   const [isCodeSent, setIsCodeSent] = useState(false)
+  const [isSendingCode, setIsSendingCode] = useState(false)
   const [isCodeVerified, setIsCodeVerified] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [message, setMessage] = useState('')
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false)
   const passwordsDoNotMatch = Boolean(confirmPassword) && password !== confirmPassword
   const canSendCode = Boolean(name && email)
-  const canContinue = Boolean(name && email && verificationCode)
+  const canContinue = Boolean(name && email) && verificationCode.length === 6
   const canCompleteRegistration = Boolean(password && confirmPassword) && !passwordsDoNotMatch
-  const verificationSuccessMessage = ' Verification code has been automatically filled. Please continue.'
+  const verificationSuccessMessage = 'A verification code was sent to your email.'
 
-  const handleSendCode = () => {
+  const handleSendCode = async () => {
     if (!canSendCode) {
       setMessage('Please enter your user name and email first.')
       return
     }
 
-    setIsCodeSent(true)
-    setVerificationCode('*****')
-    setMessage(verificationSuccessMessage)
+    setIsSendingCode(true)
+    setMessage('')
+
+    try {
+      await sendSignUpCode(email)
+
+      setIsCodeSent(true)
+      setVerificationCode('')
+      setMessage(verificationSuccessMessage)
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Unable to send the verification code.',
+      )
+    } finally {
+      setIsSendingCode(false)
+    }
   }
 
-  const handleContinue = (event: FormEvent<HTMLFormElement>) => {
+  const handleContinue = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault()
 
     if (!canSendCode) {
@@ -39,13 +58,28 @@ function SignUpPage() {
       return
     }
 
-    if (!verificationCode) {
-      setMessage('Please enter your verification code.')
+    if (verificationCode.length !== 6) {
+      setMessage('Please enter the six-digit verification code.')
       return
     }
 
-    setIsCodeVerified(true)
+    setIsVerifyingCode(true)
     setMessage('')
+
+    try {
+      await verifySignUpCode(email, verificationCode)
+
+      setIsCodeVerified(true)
+      setMessage('')
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : 'Unable to verify the code.',
+      )
+    } finally {
+      setIsVerifyingCode(false)
+    }
   }
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -108,30 +142,33 @@ function SignUpPage() {
               <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
                 <button
                   className={`h-13 rounded-4xl border px-4 text-sm font-extrabold transition ${
-                    !canSendCode || isCodeSent
+                    !canSendCode || isSendingCode
                       ? 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400 shadow-inner'
                       : 'cursor-pointer border-blue-100 bg-blue-50 text-blue-600 hover:bg-blue-100'
                   }`}
-                  disabled={!canSendCode || isCodeSent}
+                  disabled={!canSendCode || isSendingCode}
                   onClick={handleSendCode}
                   type="button"
                 >
-                  {isCodeSent ? 'Code Sent' : 'Send Code'}
+                  {isSendingCode
+                    ? 'Sending...'
+                    : isCodeSent
+                      ? 'Resend Code'
+                      : 'Send Code'}
                 </button>
                 <input
                   autoComplete="one-time-code"
-                  aria-readonly={isCodeSent}
                   className={`h-13 min-w-0 rounded-4xl border px-5 text-sm font-bold outline-0 transition disabled:bg-gray-50 disabled:text-gray-300 ${
                     isCodeSent
-                      ? 'pointer-events-none cursor-not-allowed border-gray-200 bg-gray-100 text-gray-500 shadow-inner'
-                      : 'border-blue-100 bg-white text-gray-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
+                      ? 'border-blue-100 bg-white text-gray-700 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
+                      : 'border-gray-200 bg-gray-100 text-gray-400 shadow-inner'
                   }`}
                   disabled={!isCodeSent}
+                  inputMode="numeric"
+                  maxLength={6}
                   name="verificationCode"
-                  onChange={(event) => setVerificationCode(event.target.value)}
+                  onChange={(event) => setVerificationCode(event.target.value.replace(/\D/g, '').slice(0, 6),)}
                   placeholder="Enter code"
-                  readOnly={isCodeSent}
-                  tabIndex={isCodeSent ? -1 : undefined}
                   value={verificationCode}
                 />
               </div>
@@ -150,10 +187,10 @@ function SignUpPage() {
 
           <button
             className="font-outfit mt-2 h-14 cursor-pointer rounded-4xl border-0 bg-blue-500 text-xl font-extrabold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
-            disabled={!canContinue}
+            disabled={!canContinue || isVerifyingCode}
             type="submit"
           >
-            Continue
+            {isVerifyingCode ? 'Verifying...' : 'Continue'}
           </button>
 
           <p className="m-0 text-center text-sm text-gray-400">
