@@ -21,6 +21,7 @@ public class Listing
     public DateOnly? AvailableTo { get; set; }
     public string? ImageLabel { get; set; }
     public string? ImageAssetKey { get; set; }
+    public List<ListingImage> Images { get; set; } = [];
     public string Status { get; set; } = "active";
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
     public DateTimeOffset UpdatedAt { get; set; } = DateTimeOffset.UtcNow;

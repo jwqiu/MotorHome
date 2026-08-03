@@ -37,6 +37,7 @@ public class ListingController(
     {
         var query = dbContext.Listings
             .AsNoTracking()
+            .Include(currentListing => currentListing.Images)
             .Where(currentListing => currentListing.Status == "active");
 
         if (!string.IsNullOrWhiteSpace(country))
@@ -312,6 +313,7 @@ public class ListingController(
         }
 
         var listing = await dbContext.Listings
+            .Include(currentListing => currentListing.Images)
             .FirstOrDefaultAsync(currentListing => currentListing.Id == id, cancellationToken);
 
         if (listing is null)
@@ -422,12 +424,17 @@ public class ListingController(
 
         var listings = await dbContext.Listings
             .AsNoTracking()
+            .Include(currentListing => currentListing.Images)
             .Where(currentListing => currentListing.OwnerId == ownerId)
             .OrderBy(currentListing => currentListing.Id)
-            .Select(currentListing => ListingDetailResponse.FromListing(currentListing, owner))
-            .ToArrayAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
 
-        return Ok(listings);
+        var response = listings
+            .Select(currentListing =>
+                ListingDetailResponse.FromListing(currentListing, owner))
+            .ToArray();
+
+        return Ok(response);
     }
 
     [HttpGet("{slug}")]
@@ -442,6 +449,7 @@ public class ListingController(
 
         var listing = await dbContext.Listings
             .AsNoTracking()
+            .Include(currentListing => currentListing.Images)
             .FirstOrDefaultAsync(currentListing => currentListing.Slug == slug.Trim(), cancellationToken);
 
         if (listing is null)
@@ -579,6 +587,7 @@ public record ListingDetailResponse(
     DateOnly? AvailableTo,
     string? ImageLabel,
     string? ImageAssetKey,
+    ListingImageResponse[] Images,
     DateOnly CreatedAt,
     ListingOwnerResponse Owner)
 {
@@ -603,6 +612,13 @@ public record ListingDetailResponse(
             listing.AvailableTo,
             listing.ImageLabel,
             listing.ImageAssetKey,
+            listing.Images
+                .OrderBy(currentImage => currentImage.SortOrder)
+                .Select(currentImage => new ListingImageResponse(
+                    currentImage.Id,
+                    currentImage.Url,
+                    currentImage.SortOrder))
+                .ToArray(),
             DateOnly.FromDateTime(listing.CreatedAt.UtcDateTime),
             ListingOwnerResponse.FromUser(owner));
     }

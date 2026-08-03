@@ -84,7 +84,7 @@ public class MotorHomeDbContext(DbContextOptions<MotorHomeDbContext> options) : 
         });
 
         listingImage.HasOne<Listing>()
-            .WithMany()
+            .WithMany(currentListing => currentListing.Images)
             .HasForeignKey(currentImage => currentImage.ListingId)
             .OnDelete(DeleteBehavior.Cascade);
 
