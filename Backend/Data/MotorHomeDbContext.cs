@@ -7,6 +7,7 @@ public class MotorHomeDbContext(DbContextOptions<MotorHomeDbContext> options) : 
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Listing> Listings => Set<Listing>();
+    public DbSet<ListingImage> ListingImages => Set<ListingImage>();
     public DbSet<Enquiry> Enquiries => Set<Enquiry>();
     public DbSet<EmailVerificationCode> EmailVerificationCodes => Set<EmailVerificationCode>();
 
@@ -70,6 +71,40 @@ public class MotorHomeDbContext(DbContextOptions<MotorHomeDbContext> options) : 
         listing.Property(currentListing => currentListing.Status).HasColumnName("status");
         listing.Property(currentListing => currentListing.CreatedAt).HasColumnName("created_at");
         listing.Property(currentListing => currentListing.UpdatedAt).HasColumnName("updated_at");
+
+        var listingImage = modelBuilder.Entity<ListingImage>();
+
+        listingImage.ToTable("listing_images");
+        listingImage.HasKey(currentImage => currentImage.Id);
+
+        listingImage.HasIndex(currentImage => new
+        {
+            currentImage.ListingId,
+            currentImage.SortOrder
+        });
+
+        listingImage.HasOne<Listing>()
+            .WithMany()
+            .HasForeignKey(currentImage => currentImage.ListingId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        listingImage.Property(currentImage => currentImage.Id)
+            .HasColumnName("id");
+
+        listingImage.Property(currentImage => currentImage.ListingId)
+            .HasColumnName("listing_id");
+
+        listingImage.Property(currentImage => currentImage.Url)
+            .HasColumnName("url");
+
+        listingImage.Property(currentImage => currentImage.PublicId)
+            .HasColumnName("public_id");
+
+        listingImage.Property(currentImage => currentImage.SortOrder)
+            .HasColumnName("sort_order");
+
+        listingImage.Property(currentImage => currentImage.CreatedAt)
+            .HasColumnName("created_at");
 
         var enquiry = modelBuilder.Entity<Enquiry>();
 

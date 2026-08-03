@@ -8,6 +8,7 @@ const string FrontendCorsPolicy = "FrontendCorsPolicy";
 builder.Services.AddDbContext<MotorHomeDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("MotorHome")));
 builder.Services.AddScoped<PasswordHashService>();
+builder.Services.AddSingleton<CloudinaryService>();
 
 builder.Services.AddHttpClient<EmailService>(client =>
 {
