@@ -2,14 +2,27 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MotorHome.Api.Data;
 using MotorHome.Api.Models;
+using MotorHome.Api.Services;
 using System.Text.RegularExpressions;
 
 namespace MotorHome.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ListingController(MotorHomeDbContext dbContext) : ControllerBase
+public class ListingController(
+    MotorHomeDbContext dbContext,
+    CloudinaryService cloudinaryService) : ControllerBase
 {
+    private const int MaximumImageCount = 5;
+    private const long MaximumImageSize = 5 * 1024 * 1024;
+
+    private static readonly HashSet<string> AllowedImageTypes =
+    [
+        "image/jpeg",
+        "image/png",
+        "image/webp"
+    ];
+
     [HttpGet]
     public async Task<ActionResult<ListingDetailResponse[]>> GetListings(
         [FromQuery] string? country,
@@ -152,6 +165,133 @@ public class ListingController(MotorHomeDbContext dbContext) : ControllerBase
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Created($"/api/listing/{listing.Slug}", ListingDetailResponse.FromListing(listing, owner));
+    }
+
+    [HttpPost("{id:int}/images")]
+    [RequestSizeLimit(27 * 1024 * 1024)]
+    public async Task<ActionResult<ListingImageResponse[]>> UploadListingImages(
+        int id,
+        [FromForm] Guid ownerId,
+        [FromForm] List<IFormFile> images,
+        CancellationToken cancellationToken)
+    {
+        if (id <= 0 || ownerId == Guid.Empty)
+        {
+            return BadRequest(
+                new ErrorResponse("Listing id and owner id are required."));
+        }
+
+        var listing = await dbContext.Listings
+            .FirstOrDefaultAsync(
+                currentListing => currentListing.Id == id,
+                cancellationToken);
+
+        if (listing is null)
+        {
+            return NotFound(
+                new ErrorResponse("Listing was not found."));
+        }
+
+        if (listing.OwnerId != ownerId)
+        {
+            return Forbid();
+        }
+
+        if (images.Count == 0)
+        {
+            return BadRequest(
+                new ErrorResponse("Choose at least one image."));
+        }
+
+        var existingImageCount = await dbContext.ListingImages
+            .CountAsync(
+                currentImage => currentImage.ListingId == id,
+                cancellationToken);
+
+        if (existingImageCount + images.Count > MaximumImageCount)
+        {
+            return BadRequest(
+                new ErrorResponse(
+                    $"A listing can have no more than {MaximumImageCount} images."));
+        }
+
+        foreach (var image in images)
+        {
+            if (image.Length == 0 || image.Length > MaximumImageSize)
+            {
+                return BadRequest(
+                    new ErrorResponse(
+                        "Each image must be between 1 byte and 5 MB."));
+            }
+
+            if (!AllowedImageTypes.Contains(image.ContentType))
+            {
+                return BadRequest(
+                    new ErrorResponse(
+                        "Only JPEG, PNG, and WebP images are supported."));
+            }
+        }
+
+        var uploadedImages = new List<CloudinaryImageResult>();
+
+        try
+        {
+            foreach (var image in images)
+            {
+                var uploadedImage =
+                    await cloudinaryService.UploadImageAsync(
+                        image,
+                        listing.Id,
+                        cancellationToken);
+
+                uploadedImages.Add(uploadedImage);
+
+                dbContext.ListingImages.Add(new ListingImage
+                {
+                    ListingId = listing.Id,
+                    Url = uploadedImage.Url,
+                    PublicId = uploadedImage.PublicId,
+                    SortOrder = existingImageCount + uploadedImages.Count - 1,
+                    CreatedAt = DateTimeOffset.UtcNow
+                });
+            }
+
+            listing.UpdatedAt = DateTimeOffset.UtcNow;
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception error)
+        {
+            foreach (var uploadedImage in uploadedImages)
+            {
+                try
+                {
+                    await cloudinaryService.DeleteImageAsync(
+                        uploadedImage.PublicId);
+                }
+                catch
+                {
+                    // Preserve the original upload or database error.
+                }
+            }
+
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new ErrorResponse(
+                    $"Unable to store listing images: {error.Message}"));
+        }
+
+        var savedImages = await dbContext.ListingImages
+            .AsNoTracking()
+            .Where(currentImage => currentImage.ListingId == listing.Id)
+            .OrderBy(currentImage => currentImage.SortOrder)
+            .Select(currentImage => new ListingImageResponse(
+                currentImage.Id,
+                currentImage.Url,
+                currentImage.SortOrder))
+            .ToArrayAsync(cancellationToken);
+
+        return Ok(savedImages);
     }
 
     [HttpPut("{id:int}")]
@@ -487,3 +627,8 @@ public record ListingOwnerResponse(
             user.Bio ?? string.Empty);
     }
 }
+
+public record ListingImageResponse(
+    int Id,
+    string Url,
+    int SortOrder);
