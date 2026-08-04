@@ -1,9 +1,10 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import {type ChangeEvent, type FormEvent, useEffect, useRef, useState,} from 'react'
 import { getSessionUserId, isAuthenticated } from '../components/auth/authSession'
 import {
   createListing,
   getListingDetail,
   updateListing,
+  uploadListingImages,
   type ListingDetail,
   type SaveListingPayload,
 } from '../components/listing/listingApi'
@@ -38,6 +39,19 @@ const futureFields = [
   'Pickup and return instructions',
   'House rules, pets, and smoking policy',
 ]
+
+const maximumImageCount = 5
+const maximumImageSize = 5 * 1024 * 1024
+const allowedImageTypes = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+]
+
+type SelectedImage = {
+  file: File
+  previewUrl: string
+}
 
 type ListingFormState = {
   availableFrom: string
@@ -224,6 +238,18 @@ function ManageListingFormPage() {
   const [loadedListing, setLoadedListing] = useState<ListingDetail | null>(null)
   const [pageMessage, setPageMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedImages, setSelectedImages] =
+    useState<SelectedImage[]>([])
+
+  const previewUrlsRef = useRef<string[]>([])
+  
+  useEffect(() => {
+    return () => {
+      previewUrlsRef.current.forEach((previewUrl) => {
+        URL.revokeObjectURL(previewUrl)
+      })
+    }
+  }, [])
 
   useEffect(() => {
     let isActive = true
@@ -321,11 +347,87 @@ function ManageListingFormPage() {
     })
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleImageSelection = (
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    const files = Array.from(event.target.files ?? [])
+    const existingImageCount =
+      loadedListing?.listing.imageUrls?.length ?? 0
+
+    if (
+      existingImageCount +
+        selectedImages.length +
+        files.length >
+      maximumImageCount
+    ) {
+      setPageMessage(
+        `A listing can have no more than ${maximumImageCount} images.`,
+      )
+
+      event.target.value = ''
+      return
+    }
+
+    const invalidFile = files.find((file) => {
+      return (
+        file.size === 0 ||
+        file.size > maximumImageSize ||
+        !allowedImageTypes.includes(file.type)
+      )
+    })
+
+    if (invalidFile) {
+      setPageMessage(
+        'Choose JPEG, PNG, or WebP images up to 5 MB each.',
+      )
+
+      event.target.value = ''
+      return
+    }
+
+    const nextImages = files.map((file) => {
+      const previewUrl = URL.createObjectURL(file)
+      previewUrlsRef.current.push(previewUrl)
+
+      return {
+        file,
+        previewUrl,
+      }
+    })
+
+    setSelectedImages((currentImages) => [
+      ...currentImages,
+      ...nextImages,
+    ])
+
+    setPageMessage('')
+    event.target.value = ''
+  }
+
+  const removeSelectedImage = (previewUrl: string) => {
+    URL.revokeObjectURL(previewUrl)
+
+    previewUrlsRef.current =
+      previewUrlsRef.current.filter(
+        (currentUrl) => currentUrl !== previewUrl,
+      )
+
+    setSelectedImages((currentImages) =>
+      currentImages.filter(
+        (image) => image.previewUrl !== previewUrl,
+      ),
+    )
+  }
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault()
 
     if (!userId) {
-      setPageMessage('Please sign in before saving a listing.')
+      setPageMessage(
+        'Please sign in before saving a listing.',
+      )
       return
     }
 
@@ -350,18 +452,48 @@ function ManageListingFormPage() {
     setIsSubmitting(true)
     setPageMessage('')
 
-    const saveRequest = isEditMode && loadedListing
-      ? updateListing(loadedListing.listing.listingId, payload)
-      : createListing(payload)
+    let savedDetail: ListingDetail | null = null
 
-    saveRequest
-      .then((detail) => {
-        window.location.href = `/listings/${detail.listing.id}`
-      })
-      .catch((error) => {
-        setPageMessage(error instanceof Error ? error.message : 'Unable to save listing.')
-      })
-      .finally(() => setIsSubmitting(false))
+    try {
+      savedDetail =
+        isEditMode && loadedListing
+          ? await updateListing(
+              loadedListing.listing.listingId,
+              payload,
+            )
+          : await createListing(payload)
+
+      if (selectedImages.length > 0) {
+        await uploadListingImages(
+          savedDetail.listing.listingId,
+          userId,
+          selectedImages.map((image) => image.file),
+        )
+      }
+
+      window.location.href =
+        `/listings/${savedDetail.listing.id}`
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Unable to save listing.'
+
+      if (savedDetail) {
+        window.alert(
+          `Your listing details were saved, but its images could not be uploaded. ${errorMessage}`,
+        )
+
+        window.location.href =
+          `/user-center/listings/${savedDetail.listing.id}/edit`
+
+        return
+      }
+
+      setPageMessage(errorMessage)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const cityOptions = form.country ? citiesByCountry[form.country] : []
@@ -433,22 +565,70 @@ function ManageListingFormPage() {
               />
             </label>
 
-            <div className="mt-5 flex justify-between w-2/3 ">
-              <div className="items-center">
-                <p className="font-outfit m-0 text-sm font-extrabold text-gray-700">Add Images</p>
-                <p className="mt-2 mb-0 whitespace-nowrap text-sm font-medium text-gray-400">Image upload will be supported soon.</p>
+            <div className="mt-8">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <p className="font-outfit m-0 text-sm font-extrabold text-gray-700">
+                    Add images
+                  </p>
 
-              </div>
-              <div className="flex flex-col justify-end items-end">
-                <button
-                  className="h-11 cursor-not-allowed rounded-4xl border border-gray-100 bg-gray-50 px-6 text-sm font-extrabold text-gray-300"
-                  disabled
-                  type="button"
-                >
-                  Add image
-                </button>
+                  <p className="mt-2 mb-0 text-sm font-medium text-gray-400">
+                    Add up to five JPEG, PNG, or WebP images. Maximum 5 MB each.
+                  </p>
+                </div>
 
+                <label className="inline-flex h-11 cursor-pointer items-center rounded-4xl border border-blue-200 bg-blue-50 px-6 text-sm font-extrabold text-blue-600 transition hover:bg-blue-100">
+                  Choose images
+
+                  <input
+                    accept="image/jpeg,image/png,image/webp"
+                    className="sr-only"
+                    disabled={
+                      (loadedListing?.listing.imageUrls?.length ?? 0) +
+                        selectedImages.length >=
+                      maximumImageCount
+                    }
+                    multiple
+                    onChange={handleImageSelection}
+                    type="file"
+                  />
+                </label>
               </div>
+
+              {selectedImages.length > 0 ? (
+                <div className="mt-5 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+                  {selectedImages.map((image, index) => (
+                    <div
+                      className="overflow-hidden rounded-3xl border border-blue-100 bg-blue-50"
+                      key={image.previewUrl}
+                    >
+                      <div className="aspect-[16/10] overflow-hidden bg-white">
+                        <img
+                          alt={`Selected listing image ${index + 1}`}
+                          className="h-full w-full object-cover"
+                          src={image.previewUrl}
+                        />
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 px-4 py-3">
+                        <span className="truncate text-xs font-bold text-gray-500">
+                          {index === 0 ? 'Cover image' : image.file.name}
+                        </span>
+
+                        <button
+                          className="cursor-pointer border-0 bg-transparent text-xs font-extrabold text-red-500"
+                          onClick={() =>
+                            removeSelectedImage(image.previewUrl)
+                          }
+                          type="button"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </section>
 

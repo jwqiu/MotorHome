@@ -44,6 +44,10 @@ function ListingDetailPage() {
       return []
     }
 
+    if (listing.imageUrls && listing.imageUrls.length > 0) {
+      return listing.imageUrls
+    }
+
     return [
       listing.imageSrc,
       getListingPlaceholderImage(),

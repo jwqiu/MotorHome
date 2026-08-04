@@ -10,6 +10,12 @@ export type ListingOwnerResponse = {
   spokenLanguages: string
 }
 
+type ListingImageResponse = {
+  id: number
+  sortOrder: number
+  url: string
+}
+
 type ListingDetailResponse = {
   availableFrom?: string
   availableTo?: string
@@ -24,6 +30,7 @@ type ListingDetailResponse = {
   exchangeTypes: string[]
   id: string
   imageLabel?: string
+  images?: ListingImageResponse[]
   listingId: number
   listingType: string
   owner: ListingOwnerResponse
@@ -159,6 +166,44 @@ export async function updateListing(listingId: number, payload: SaveListingPaylo
   return parseSavedListingResponse(response, 'Unable to update listing. Please try again.')
 }
 
+export async function uploadListingImages(
+  listingId: number,
+  ownerId: string,
+  images: File[],
+) {
+  const formData = new FormData()
+
+  formData.append('ownerId', ownerId)
+
+  images.forEach((image) => {
+    formData.append('images', image)
+  })
+
+  const response = await apiFetch(
+    `/api/listing/${listingId}/images`,
+    {
+      body: formData,
+      method: 'POST',
+    },
+  )
+
+  if (!response.ok) {
+    let errorMessage =
+      'Unable to upload listing images. Please try again.'
+
+    try {
+      const error = (await response.json()) as ErrorResponse
+      errorMessage = error.message || errorMessage
+    } catch {
+      // Keep the generic message for a non-JSON response.
+    }
+
+    throw new Error(errorMessage)
+  }
+
+  return response.json() as Promise<ListingImageResponse[]>
+}
+
 export async function deleteListing(listingId: number, ownerId: string) {
   const response = await apiFetch(`/api/listing/${listingId}?ownerId=${encodeURIComponent(ownerId)}`, {
     method: 'DELETE',
@@ -207,6 +252,11 @@ async function parseSavedListingResponse(response: Response, fallbackMessage: st
 }
 
 function mapListingDetail(detail: ListingDetailResponse): ListingDetail {
+  const imageUrls = [...(detail.images ?? [])]
+    .sort((firstImage, secondImage) =>
+      firstImage.sortOrder - secondImage.sortOrder)
+    .map((image) => image.url)
+
   const listing: Listing = {
     availableFrom: detail.availableFrom || '',
     availableTo: detail.availableTo || '',
@@ -221,7 +271,9 @@ function mapListingDetail(detail: ListingDetailResponse): ListingDetail {
     exchangeTypes: detail.exchangeTypes,
     id: detail.id,
     imageLabel: detail.imageLabel || detail.title,
-    imageSrc: getListingImageByListingId(detail.listingId),
+    imageSrc:
+      imageUrls[0] ?? getListingImageByListingId(detail.listingId),
+    imageUrls,
     listingId: detail.listingId,
     listingType: detail.listingType,
     title: detail.title,

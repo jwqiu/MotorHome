@@ -38,6 +38,7 @@ export type Listing = {
   title: string
   imageLabel: string
   imageSrc: string
+  imageUrls?: string[]
   listingType: string
   currentLocation: string
   wantedAssets: string[]
