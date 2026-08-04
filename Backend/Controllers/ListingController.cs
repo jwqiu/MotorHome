@@ -396,6 +396,27 @@ public class ListingController(
                 "This listing is linked to active exchange enquiries. Please complete, decline, or cancel the related enquiries before deleting it."));
         }
 
+        var listingImages = await dbContext.ListingImages
+            .Where(currentImage =>
+                currentImage.ListingId == listing.Id)
+            .ToListAsync(cancellationToken);
+
+        try
+        {
+            foreach (var listingImage in listingImages)
+            {
+                await cloudinaryService.DeleteImageAsync(
+                    listingImage.PublicId);
+            }
+        }
+        catch (Exception error)
+        {
+            return StatusCode(
+                StatusCodes.Status502BadGateway,
+                new ErrorResponse(
+                    $"Unable to remove the listing images: {error.Message}"));
+        }
+        
         dbContext.Enquiries.RemoveRange(relatedEnquiries);
         dbContext.Listings.Remove(listing);
         await dbContext.SaveChangesAsync(cancellationToken);
